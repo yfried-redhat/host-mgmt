@@ -1,0 +1,23 @@
+{
+  "user": "root",
+  "password": "qum5net",
+  "os": "RHEL7",
+  "private_key": "/home/yfried/handson/handson.key",
+  "roles": {
+    "controller": {
+      "10.35.186.65": {}
+    },
+    "Networker": {
+      "10.35.186.66": {}
+    },
+    "Computes": {
+      "10.35.186.67": {
+        "alias": "c1",
+        "password": "override"
+      },
+      "10.35.186.68": {
+        "alias": "c2"
+      }
+    }
+  }
+}
