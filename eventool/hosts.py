@@ -1,6 +1,6 @@
-import logger
-
 from rally import sshutils
+
+from eventool import logger
 
 LOG = logger.getLogger(__name__)
 

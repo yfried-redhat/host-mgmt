@@ -1,4 +1,4 @@
-host-mgmt
+eventool
 =========
 
 First Gerrithub commit

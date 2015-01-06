@@ -1,7 +1,7 @@
 import functools
 import time
 
-import logger
+from eventool import logger
 
 
 LOG = logger.getLogger(__name__)

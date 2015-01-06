@@ -1,8 +1,8 @@
 import argparse
 import json
 
-import hosts
-import logger
+from eventool import logger
+from eventool import hosts
 import servicemgmt
 
 
@@ -12,7 +12,6 @@ LOG = logger.getLogger(__name__)
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    # first = parser.add_argument_group()
     parser.add_argument("target",
                         help="remote host: ip, FQDN, or alias for a "
                              "single host. host_role is also possible to "
@@ -57,8 +56,10 @@ def load_conf(path=HOSTS_CONF):
 
 
 def service_exec(args):
+    target = args.target
+    service = args.service
     output = getattr(servicemgmt, args.op)(target.ssh.execute,
-                                           args.service)
+                                           service)
     pass
 
 
@@ -74,6 +75,7 @@ def send_cmd(target, cmd=""):
 def script_exec(args):
     interpreter = args.interpreter
     script = args.script
+    target = args.target
     code, out, err = target.ssh.execute(interpreter, stdin=open(script, "rb"))
     if code:
         LOG.warn("cmd: '{cmd}' Returned with error code: {code}. msg: {msg}".
@@ -83,18 +85,14 @@ def script_exec(args):
     return out, err
 
 
-# def main():
-#     args = parse_arguments()
-#     target = hosts_from_conf.find_hosts(args.target)
-#     if args.raw:
-#         cmd = " ".join(args.raw)
-#         send_cmd(target, cmd)
-#     elif args.script:
-#         send_script(target, *args.script)
-
-
-if __name__ == "__main__":
+def main():
     hosts_from_conf = load_conf()
     args = parse_arguments()
-    target = hosts_from_conf.find_hosts(args.target)
+    args.target = hosts_from_conf.find_hosts(args.target)
     args.func(args)
+
+# if __name__ == "__main__":
+#     hosts_from_conf = load_conf()
+#     args = parse_arguments()
+#     target = hosts_from_conf.find_hosts(args.target)
+#     args.func(args)

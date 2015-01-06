@@ -1,5 +1,5 @@
 [gerrit]
 host=review.gerrithub.io
 port=29418
-project=yfried-redhat/host-mgmt.git
+project=yfried-redhat/eventool.git
 
