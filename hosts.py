@@ -1,5 +1,6 @@
-from rally import sshutils
 import logger
+
+from rally import sshutils
 
 LOG = logger.getLogger(__name__)
 
@@ -59,7 +60,7 @@ class Hosts(object):
             return None
 
     def find_hosts(self, target):
-        """
+        """Finds hosts
 
         :param target: string to search host DB
         :return:

@@ -1,69 +1,27 @@
+import functools
 import time
+
 import logger
-#
-# import abc
-#
+
+
 LOG = logger.getLogger(__name__)
-#
-#
-# # class CMDMgmt(object):
-#
-# @staticmethod
-#     def cmd(self, *args, **kwargs):
-#         pass
-#
-#     @staticmethod
-#     def parse(self, cmd, code, out, err, *args, **kwargs):
-#         if code:
-#             LOG.warn("cmd: '{cmd}' Returned with error code: {code}. "
-#                      "msg: {msg}".
-#                      format(cmd=cmd, code=code, msg=err))
-#         LOG.info(out)
-#         return out, err
-#
-#
-#
-#
-#
-# # class ServiceMgmt(object):
-#
-#     def __init__(self, ssh_client):
-#         super(ServiceMgmt, self).__init__()
-#
-#     # def __getattr__(self, name):
-#     #     service_cmds = ["start", "stop", "status", "disable", "enable"]
-#     #     if name in service_cmds:
-#     #         # TODO(yfried): implement commands
-#     #         return self.build_cmd(name)
-#     #     raise AttributeError(name)
-#
-#     # def gen_method(self, name):
-#     #     def self.build_cmd(*args, **kwargs)
-#     #         pass
-#     #     return
-#
-#     @abc.abstractmethod
-#     def build_cmd(self, cmd, service):
-#         pass
-#
-#     def send_cmd
-#
-#
-# # class ServiceMgmtRHEL(ServiceMgmt):
-# #     CMD = None
-# #
-# #     def build_cmd(self, cmd, service):
-# #         return self.CMD.format(cmd=cmd, service=service)
-# #
-# #
-# # class Systemd(ServiceMgmtRHEL):
-# #     CMD = "systemclt {cmd} {service}"
-# #
-# #
-# # class Sysvinit(ServiceMgmtRHEL):
-# #     CMD = "service {service} {cmd}"
 
 CMD = "systemctl {op} {service}"
+
+
+def log_cmd(op, no_ouput=False):
+    def _decorator(f):
+        @functools.wraps(f)
+        def logged_cmd(*args, **kwargs):
+            service = kwargs.get('service') or args[-1]
+            cmd = CMD.format(service=service, op=op)
+            LOG.info('executing cmd: %s' % cmd)
+            out = f(*args, **kwargs)
+            if no_ouput:
+                out = True
+            LOG.info(out)
+        return logged_cmd
+    return _decorator
 
 
 def exec_cmd(exc, op, service):
@@ -73,7 +31,7 @@ def exec_cmd(exc, op, service):
         raise Exception('failure %d running systemctl show for %r: %s'
                         % (code, service, err))
     else:
-        LOG.info(out)
+        LOG.debug(out)
         return out
 
 
@@ -108,18 +66,22 @@ def get_systemd_status_dict(out):
     return status_dict
 
 
+# no @log_cmd because we are executing another command
 def status(exc, service):
     return state(exc, service)
 
 
+@log_cmd(op='show')
 def state(exc, service):
-    """Sends "systemctl show <service>" and evaluates the status of the
-    service based on the "ActiveState" field
+    """Sends "systemctl show <service>"
+
+    Evaluates the status of the service based on the "ActiveState" field
 
     :param exc: execution method
     :param service: service to query
     :return: status: Known values ['active', 'failed', 'inactive']
     """
+
     out = exec_cmd(exc, 'show', service)
     d = get_systemd_status_dict(out)
     if d.get("ActiveState"):
@@ -130,10 +92,12 @@ def state(exc, service):
                         % service)
 
 
+@log_cmd(op='stop', no_ouput=True)
 def stop(exc, service):
     return exec_cmd(exc, 'stop', service)
 
 
+@log_cmd(op='start', no_ouput=True)
 def start(exc, service):
     return exec_cmd(exc, 'start', service)
 
