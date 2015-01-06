@@ -1,5 +1,9 @@
 build/
+.eggs/
 *.egg-info/
 *.pyc
 *.log
 *.ini
+venv/
+pbr-0.10.7-py2.7.egg/
+
