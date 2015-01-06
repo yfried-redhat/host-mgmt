@@ -1,4 +1,5 @@
 import time
+import functools
 import logger
 #
 # import abc
@@ -66,6 +67,21 @@ LOG = logger.getLogger(__name__)
 CMD = "systemctl {op} {service}"
 
 
+def log_cmd(op, no_ouput=False):
+    def _decorator(f):
+        @functools.wraps(f)
+        def logged_cmd(*args, **kwargs):
+            service = kwargs.get('service') or args[-1]
+            cmd = CMD.format(service=service, op=op)
+            LOG.info('executing cmd: %s' % cmd)
+            out = f(*args, **kwargs)
+            if no_ouput:
+                out = True
+            LOG.info(out)
+        return logged_cmd
+    return _decorator
+
+
 def exec_cmd(exc, op, service):
     code, out, err = exc(CMD.format(op=op, service=service))
     if code != 0:
@@ -73,7 +89,7 @@ def exec_cmd(exc, op, service):
         raise Exception('failure %d running systemctl show for %r: %s'
                         % (code, service, err))
     else:
-        LOG.info(out)
+        LOG.debug(out)
         return out
 
 
@@ -108,10 +124,12 @@ def get_systemd_status_dict(out):
     return status_dict
 
 
+# no @log_cmd because we are executing another command
 def status(exc, service):
     return state(exc, service)
 
 
+@log_cmd(op='show')
 def state(exc, service):
     """Sends "systemctl show <service>" and evaluates the status of the
     service based on the "ActiveState" field
@@ -130,10 +148,12 @@ def state(exc, service):
                         % service)
 
 
+@log_cmd(op='stop', no_ouput=True)
 def stop(exc, service):
     return exec_cmd(exc, 'stop', service)
 
 
+@log_cmd(op='start', no_ouput=True)
 def start(exc, service):
     return exec_cmd(exc, 'start', service)
 
