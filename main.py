@@ -1,5 +1,5 @@
-import json
 import argparse
+import json
 
 import hosts
 import logger
@@ -15,7 +15,8 @@ def parse_arguments():
     # first = parser.add_argument_group()
     parser.add_argument("target",
                         help="remote host: ip, FQDN, or alias for a "
-                             "single host. host_role is also possible to work on "
+                             "single host. host_role is also possible to "
+                             "work on "
                              "multiple matching hosts")
     subparse = parser.add_subparsers()
 
