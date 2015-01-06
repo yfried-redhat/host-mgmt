@@ -1,4 +1,4 @@
-from rally import sshutils
+from rally.common import sshutils as rally_ssh
 
 from eventool import logger
 
@@ -21,7 +21,8 @@ class Host(object):
     @property
     def ssh(self):
         if not self._ssh:
-            self._ssh = sshutils.SSH(user=self.user, host=self.address,
+            self._ssh = rally_ssh.SSH(user=self.user,
+                                              host=self.address,
                                      key_filename=self.private_key,
                                      password=self.password)
         return self._ssh
