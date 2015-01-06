@@ -1,5 +1,6 @@
 import argparse
 import json
+import sys
 
 from eventool import logger
 from eventool import hosts
@@ -91,8 +92,8 @@ def main():
     args.target = hosts_from_conf.find_hosts(args.target)
     args.func(args)
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 #     hosts_from_conf = load_conf()
 #     args = parse_arguments()
 #     target = hosts_from_conf.find_hosts(args.target)
-#     args.func(args)
+    sys.exit(main())

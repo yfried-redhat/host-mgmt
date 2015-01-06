@@ -2,5 +2,5 @@
 import setuptools
 
 setuptools.setup(
-    setup_requires=['rally', 'pbr'],
+    setup_requires=['eventool', 'pbr'],
     pbr=True)
