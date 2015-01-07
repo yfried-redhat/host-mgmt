@@ -17,11 +17,13 @@ console = logging.StreamHandler()
 console.setLevel(logging.INFO)
 # set a format which is simpler for console use
 formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
-# tell the handler to use this format
-console.setFormatter(formatter)
+# # tell the handler to use this format
+# console.setFormatter(formatter)
 # add the handler to the root logger
 logging.getLogger('').addHandler(console)
 
 getLogger = logging.getLogger
 
 LOG = logging.getLogger(LOGGER_NAME)
+
+logging.getLogger("paramiko").setLevel(logging.WARNING)

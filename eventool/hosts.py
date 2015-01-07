@@ -4,7 +4,6 @@ from eventool import logger
 
 LOG = logger.getLogger(__name__)
 
-
 class Host(object):
     def __init__(self, address, user, alias="", host_role="", password=None,
                  private_key=None, os=None):

@@ -1,4 +1,5 @@
 import functools
+import json
 import time
 
 from eventool import logger
@@ -10,16 +11,22 @@ CMD = "systemctl {op} {service}"
 
 
 def log_cmd(op, no_ouput=False):
+
+    allign = 20
+    a = '{pre:<10}:{prnt:>{allign}}'
+
     def _decorator(f):
         @functools.wraps(f)
         def logged_cmd(*args, **kwargs):
             service = kwargs.get('service') or args[-1]
             cmd = CMD.format(service=service, op=op)
-            LOG.info('executing cmd: %s' % cmd)
             out = f(*args, **kwargs)
             if no_ouput:
                 out = True
-            LOG.info(out)
+            cmd_dict = dict(cmd=cmd, out=out)
+            LOG.info(a.format(pre='ouptut', prnt=out, allign=allign))
+            # LOG.info(json.dumps(cmd_dict))
+            # LOG.info(str(cmd_dict))
         return logged_cmd
     return _decorator
 
