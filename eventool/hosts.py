@@ -1,3 +1,4 @@
+import functools
 from rally.common import sshutils as rally_ssh
 
 from eventool import logger
@@ -16,6 +17,35 @@ class Host(object):
         self.os = os
         self.user = user
         self._ssh = None
+    #
+    # def log_cmd(self, cmd="", no_ouput=False):
+    #     allign = 20
+    #     a = '{pre:<10}:{prnt:>{allign}}'
+    #
+    #     def _decorator(f):
+    #         @functools.wraps(f)
+    #         def logged_cmd(*args, **kwargs):
+    #             code, out, err = self.ssh.execute(cmd=cmd)
+    #             if code != 0:
+    #                 # TODO(yfried): add a better exception
+    #                 raise Exception('failure %d running systemctl show for %r: %s'
+    #                                 % (code, service, err))
+    #             else:
+    #                 LOG.debug(out)
+    #                 return out
+    #
+    #             service = kwargs.get('service') or args[-1]
+    #             # cmd = CMD.format(service=service, op=op)
+    #             out = f(*args, **kwargs)
+    #             if no_ouput:
+    #                 out = True
+    #             # cmd_dict = dict(cmd=cmd, out=out)
+    #             LOG.info(a.format(pre='ouptut', prnt=out, allign=allign))
+    #             # LOG.info(json.dumps(cmd_dict))
+    #             # LOG.info(str(cmd_dict))
+    #         return logged_cmd
+    #     return _decorator
+    #
 
     @property
     def ssh(self):

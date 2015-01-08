@@ -7,7 +7,7 @@ from eventool import hosts
 import servicemgmt
 
 
-HOSTS_CONF = "conf.json"
+HOSTS_CONF = "etc/hosts_conf.json"
 LOG = logger.getLogger(__name__)
 
 
@@ -59,9 +59,9 @@ def load_conf(path=HOSTS_CONF):
 def service_exec(args):
     target = args.target
     service = args.service
-    output = getattr(servicemgmt, args.op)(target.ssh.execute,
-                                           service)
-    pass
+    return getattr(servicemgmt.ServiceMgmt(target.ssh.execute), args.op)(service)
+    # return getattr(servicemgmt, args.op)(target.ssh.execute,
+    #                                      service)
 
 
 def send_cmd(target, cmd=""):

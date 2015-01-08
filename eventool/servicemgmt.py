@@ -7,109 +7,113 @@ from eventool import logger
 
 LOG = logger.getLogger(__name__)
 
-CMD = "systemctl {op} {service}"
+
+def command_decorator(f):
+    @functools.wraps(f)
+    def execute_and_parse(self, *args, **kwargs):
+        cmd, parser = f(self, *args, **kwargs)
+        out = self.exec_command(cmd)
+        out = parser(out)
+        # cmd_dict = dict(cmd=cmd, out=out)
+        LOG.info(self.out_format.format(pre='ouptut', prnt=out,
+                                        allign=self.allign))
+        # LOG.info(json.dumps(cmd_dict))
+        # LOG.info(str(cmd_dict))
+        return out
+    return execute_and_parse
 
 
-def log_cmd(op, no_ouput=False):
-
+class ServiceMgmt(object):
+    CMD = "systemctl {op} {service}"
     allign = 20
-    a = '{pre:<10}:{prnt:>{allign}}'
+    out_format = '{pre:<10}:{prnt:>{allign}}'
 
-    def _decorator(f):
-        @functools.wraps(f)
-        def logged_cmd(*args, **kwargs):
-            service = kwargs.get('service') or args[-1]
-            cmd = CMD.format(service=service, op=op)
-            out = f(*args, **kwargs)
-            if no_ouput:
-                out = True
-            cmd_dict = dict(cmd=cmd, out=out)
-            LOG.info(a.format(pre='ouptut', prnt=out, allign=allign))
-            # LOG.info(json.dumps(cmd_dict))
-            # LOG.info(str(cmd_dict))
-        return logged_cmd
-    return _decorator
+    def __init__(self, executor):
+        super(ServiceMgmt, self).__init__()
+        self.executor = executor
 
+    def exec_command(self, cmd):
+        # log command?
 
-def exec_cmd(exc, op, service):
-    code, out, err = exc(CMD.format(op=op, service=service))
-    if code != 0:
-        # TODO(yfried): add a better exception
-        raise Exception('failure %d running systemctl show for %r: %s'
-                        % (code, service, err))
-    else:
+        code, out, err = self.executor(cmd)
+        if code != 0:
+            # TODO(yfried): add a better exception
+            raise Exception('failure {code:d} running: {cmd} '
+                            '{err}'.format(code=code, cmd=cmd, err=err))
         LOG.debug(out)
         return out
 
+    @staticmethod
+    def _empty_parser(output):
+        assert output == ""
+        return True
 
-# copied ansible-modules-core/system/service.py
-def get_systemd_status_dict(out):
-    key = None
-    value_buffer = []
-    status_dict = {}
-    for line in out.splitlines():
-        if not key:
-            key, value = line.split('=', 1)
-            # systemd fields that are shell commands can be multi-line
-            # We take a value that begins with a "{" as the start of
-            # a shell command and a line that ends with "}" as the end of
-            # the command
-            if value.lstrip().startswith('{'):
-                if value.rstrip().endswith('}'):
+    @command_decorator
+    def stop(self, service):
+        return self.CMD.format(op='stop', service=service), self._empty_parser
+
+    @command_decorator
+    def start(self, service):
+        return self.CMD.format(op='start', service=service), self._empty_parser
+
+    def restart(self, service, timeout=10):
+        self.stop(service)
+        time.sleep(timeout)
+        self.start(service)
+
+    @staticmethod
+    def _status_parser(out):
+    # copied from:
+    # ansible-modules-core/system/service.py:get_systemd_status_dict
+
+        key = None
+        value_buffer = []
+        status_dict = {}
+        for line in out.splitlines():
+            if not key:
+                key, value = line.split('=', 1)
+                # systemd fields that are shell commands can be multi-line
+                # We take a value that begins with a "{" as the start of
+                # a shell command and a line that ends with "}" as the end of
+                # the command
+                if value.lstrip().startswith('{'):
+                    if value.rstrip().endswith('}'):
+                        status_dict[key] = value
+                        key = None
+                    else:
+                        value_buffer.append(value)
+                else:
                     status_dict[key] = value
+                    key = None
+            else:
+                if line.rstrip().endswith('}'):
+                    status_dict[key] = '\n'.join(value_buffer)
                     key = None
                 else:
                     value_buffer.append(value)
-            else:
-                status_dict[key] = value
-                key = None
+
+        if status_dict.get("ActiveState"):
+            return status_dict.get("ActiveState")
         else:
-            if line.rstrip().endswith('}'):
-                status_dict[key] = '\n'.join(value_buffer)
-                key = None
-            else:
-                value_buffer.append(value)
-
-    return status_dict
+            # TODO(yfried): add a better exception
+            raise Exception('No ActiveState value in systemctl show '
+                            'output: {d}'.format(status_dict))
 
 
-# no @log_cmd because we are executing another command
-def status(exc, service):
-    return state(exc, service)
 
+    @command_decorator
+    def state(self, service):
+        """Sends "systemctl show <service>"
 
-@log_cmd(op='show')
-def state(exc, service):
-    """Sends "systemctl show <service>"
+        Evaluates the status of the service based on the "ActiveState" field
 
-    Evaluates the status of the service based on the "ActiveState" field
+        :param service: service to query
+        :return: status: Known values ['active', 'failed', 'inactive']
+        """
 
-    :param exc: execution method
-    :param service: service to query
-    :return: status: Known values ['active', 'failed', 'inactive']
-    """
+        cmd = self.CMD.format(op='show', service=service)
+        return cmd, self._status_parser
 
-    out = exec_cmd(exc, 'show', service)
-    d = get_systemd_status_dict(out)
-    if d.get("ActiveState"):
-        return d.get("ActiveState")
-    else:
-        # TODO(yfried): add a better exception
-        raise Exception('No ActiveState value in systemctl show output for %r'
-                        % service)
-
-
-@log_cmd(op='stop', no_ouput=True)
-def stop(exc, service):
-    return exec_cmd(exc, 'stop', service)
-
-
-@log_cmd(op='start', no_ouput=True)
-def start(exc, service):
-    return exec_cmd(exc, 'start', service)
-
-
-def restart(exc, service, timeout=10):
-    stop(exc, service)
-    time.sleep(timeout)
-    return start(exc, service)
+    # no @command_decorator because we are executing another command
+    def status(self, service):
+        return self.state(service)
