@@ -1,13 +1,14 @@
 import argparse
-import json
 import sys
+import yaml
 
 from eventool import logger
 from eventool import hosts
+from eventool import ssh_cmds
 import servicemgmt
 
 
-HOSTS_CONF = "etc/hosts_conf.json"
+HOSTS_CONF = "etc/hosts_conf.yaml"
 LOG = logger.getLogger(__name__)
 
 
@@ -28,9 +29,14 @@ def parse_arguments():
     script.add_argument("script",
                         help="Path to script")
     script.set_defaults(func=script_exec)
-    # raw.add_argument("--raw", nargs='*',
-    #                     help="send the command directly to host(s)",
-    #                     default=None)
+
+    raw = subparse.add_parser("raw",
+                              help="send the command directly to host(s)")
+
+    raw.add_argument("command", nargs='*',
+                     help="send the command directly to host(s)",
+                     default=None)
+    raw.set_defaults(func=raw_exec)
 
     service = subparse.add_parser('service', help="service help")
     service.add_argument("op",
@@ -49,18 +55,24 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def load_conf(path=HOSTS_CONF):
-    with open(path) as json_data:
-        json_conf = json.load(json_data)
+def load_conf_file(path=HOSTS_CONF):
+    with open(path) as conf_data:
+        json_conf = yaml.load(conf_data)
 
     return hosts.Hosts(json_conf)
 
 
-def service_exec(args, **kwargs):
+def service_exec(args):
     target = args.target
     service = args.service
     print getattr(servicemgmt.ServiceMgmt(target.ssh.execute), args.op)(
         service)
+
+
+def raw_exec(args):
+    target = args.target
+    cmd = " ".join(args.command)
+    print ssh_cmds.RAWcmd(target.ssh.execute).raw_cmd(cmd)
 
 
 def send_cmd(target, cmd=""):
@@ -86,13 +98,13 @@ def script_exec(args):
 
 
 def main():
-    hosts_from_conf = load_conf()
+    hosts_from_conf = load_conf_file()
     args = parse_arguments()
     args.target = hosts_from_conf.find_hosts(args.target)
     args.func(args)
 
 if __name__ == "__main__":
-#     hosts_from_conf = load_conf()
+#     hosts_from_conf = load_conf_file()
 #     args = parse_arguments()
 #     target = hosts_from_conf.find_hosts(args.target)
     sys.exit(main())

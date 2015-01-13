@@ -9,7 +9,7 @@ def command_decorator(f):
     def execute_and_parse(self, *args, **kwargs):
         cmd, parser = f(self, *args, **kwargs)
         out = self.exec_command(cmd)
-        out = parser(out)
+        out = parser(out) if parser else out
         # cmd_dict = dict(cmd=cmd, out=out)
         LOG.info(self.out_format.format(pre='ouptut', prnt=out,
                                         allign=self.allign))
@@ -19,6 +19,7 @@ def command_decorator(f):
     return execute_and_parse
 
 
+# TODO(yfried): name this better
 class tmp_cmd(object):
     allign = 20
     out_format = '{pre:<10}:{prnt:>{allign}}'
@@ -50,4 +51,12 @@ class tmp_cmd(object):
 
     @staticmethod
     def _noop_parser(out):
+        """don't parse """
         return out
+
+
+class RAWcmd(tmp_cmd):
+
+    @command_decorator
+    def raw_cmd(self, cmd):
+        return cmd, None
