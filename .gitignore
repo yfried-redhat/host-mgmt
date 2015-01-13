@@ -6,4 +6,4 @@ build/
 *.ini
 venv/
 pbr-0.10.7-py2.7.egg/
-
+etc/*.yaml

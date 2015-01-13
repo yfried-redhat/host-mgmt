@@ -1,5 +1,5 @@
 user: "root"
-password: "qum10net"
+password: "password"
 os: "RHEL7"
 roles:
   ha_controller:
