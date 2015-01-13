@@ -5,47 +5,22 @@ from eventool import logger
 
 LOG = logger.getLogger(__name__)
 
+
 class Host(object):
-    def __init__(self, address, user, alias="", host_role="", password=None,
+    def __init__(self, address, user, alias=None, host_role="", password=None,
                  private_key=None, os=None):
 
         self.address = address
         self.host_role = host_role
-        self.alias = alias
+        self.alias = alias or []
         self.password = password
         self.private_key = private_key
         self.os = os
         self.user = user
         self._ssh = None
-    #
-    # def log_cmd(self, cmd="", no_ouput=False):
-    #     allign = 20
-    #     a = '{pre:<10}:{prnt:>{allign}}'
-    #
-    #     def _decorator(f):
-    #         @functools.wraps(f)
-    #         def logged_cmd(*args, **kwargs):
-    #             code, out, err = self.ssh.execute(cmd=cmd)
-    #             if code != 0:
-    #                 # TODO(yfried): add a better exception
-    #                 raise Exception('failure %d running systemctl show for %r: %s'
-    #                                 % (code, service, err))
-    #             else:
-    #                 LOG.debug(out)
-    #                 return out
-    #
-    #             service = kwargs.get('service') or args[-1]
-    #             # cmd = CMD.format(service=service, op=op)
-    #             out = f(*args, **kwargs)
-    #             if no_ouput:
-    #                 out = True
-    #             # cmd_dict = dict(cmd=cmd, out=out)
-    #             LOG.info(a.format(pre='ouptut', prnt=out, allign=allign))
-    #             # LOG.info(json.dumps(cmd_dict))
-    #             # LOG.info(str(cmd_dict))
-    #         return logged_cmd
-    #     return _decorator
-    #
+
+    def is_host(self, hostname):
+        return hostname == self.address or hostname in self.alias
 
     @property
     def ssh(self):
@@ -80,7 +55,7 @@ class Hosts(object):
 
     def get_alias(self, alias):
         aliased = [host for h, host in self._hosts.iteritems()
-                   if host.alias == alias]
+                   if host.is_host(alias)]
         if len(aliased) > 1:
             raise Exception("found more than 1 host with alias")
 

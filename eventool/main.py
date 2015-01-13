@@ -3,7 +3,9 @@ import json
 import sys
 
 from eventool import logger
+from eventool import ha_manage
 from eventool import hosts
+from eventool import pcs
 import servicemgmt
 
 
@@ -39,6 +41,21 @@ def parse_arguments():
                          help="service to work on")
     service.set_defaults(func=service_exec)
 
+    pcs = subparse.add_parser('pcs', help="service help")
+    pcs.add_argument("op",
+                         help="operation to execute on service")
+    pcs.add_argument("service", nargs='?',
+                     help="service to work on")
+    pcs.set_defaults(func=pcs_exec)
+    ha = subparse.add_parser('ha_manage', help="service help")
+    ha.add_argument("op",
+                         help="operation to execute on service")
+    ha.add_argument("service", nargs='?',
+                     help="service to work on")
+    ha.set_defaults(func=ha_exec)
+
+
+
     # TODO(yfried): add this option to parse lists
     # parser.add_argument("--hosts",
     #                     help="a list of remote hosts. ip, FQDN, aliases, "
@@ -56,12 +73,25 @@ def load_conf(path=HOSTS_CONF):
     return hosts.Hosts(json_conf)
 
 
-def service_exec(args):
+def service_exec(args, **kwargs):
     target = args.target
     service = args.service
-    return getattr(servicemgmt.ServiceMgmt(target.ssh.execute), args.op)(service)
-    # return getattr(servicemgmt, args.op)(target.ssh.execute,
-    #                                      service)
+    print getattr(servicemgmt.ServiceMgmt(target.ssh.execute), args.op)(
+        service)
+
+
+def pcs_exec(args, **kwargs):
+    target = args.target
+    to_args = []
+    if args.service:
+        to_args.append(args.service)
+    print getattr(pcs.PCSMgmt(target.ssh.execute), args.op)(*to_args)
+
+
+def ha_exec(args):
+    service = args.service
+    ha_hosts = args.target
+    print getattr(ha_manage.HAmanager(ha_hosts), args.op)(service)
 
 
 def send_cmd(target, cmd=""):

@@ -1,22 +1,26 @@
 {
   "user": "root",
-  "password": "qum5net",
+  "password": "qum10net",
   "os": "RHEL7",
-  "private_key": "/home/yfried/handson/handson.key",
   "roles": {
-    "controller": {
-      "10.35.186.65": {}
-    },
-    "Networker": {
-      "10.35.186.66": {}
-    },
-    "Computes": {
-      "10.35.186.67": {
-        "alias": "c1",
-        "password": "override"
+    "ha_controller": {
+      "10.35.174.21": {
+        "alias": ["mac848f69fbc4c3", "mac848f69fbc4c3.example.com"]
       },
-      "10.35.186.68": {
-        "alias": "c2"
+      "10.35.174.22": {
+        "alias": ["mac848f69fbc643", "mac848f69fbc643.example.com"]
+      },
+      "10.35.174.23": {
+        "alias": ["macf04da2732fb1", "macf04da2732fb1.example.com"]
+      }
+
+    },
+    "compute": {
+      "10.35.173.184": {
+        "alias": "mac848f69fbc493.example.com"
+      },
+      "10.35.173.185": {
+        "alias": "mac848f69fbc49f.example.com"
       }
     }
   }
