@@ -57,7 +57,6 @@ python-troveclient==1.0.8
 python-zaqarclient==0.1.0
 pytz==2014.10
 PyYAML==3.11
-rally==0.0.1.dev1442
 requests==2.5.1
 simplegeneric==0.8.1
 simplejson==3.6.5
