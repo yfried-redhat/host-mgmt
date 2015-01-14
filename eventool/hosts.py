@@ -33,10 +33,15 @@ class Host(object):
     @property
     def ssh(self):
         if not self._ssh:
-            self._ssh = rally_ssh.SSH(user=self.user,
+            ssh = rally_ssh.SSH(user=self.user,
                                               host=self.address,
                                      key_filename=self.private_key,
                                      password=self.password)
+            ssh._get_client()
+            # except Exception as e:
+            #     raise Exception("no connection to %s" % ssh.host)
+            self._ssh = ssh
+
         return self._ssh
 
 

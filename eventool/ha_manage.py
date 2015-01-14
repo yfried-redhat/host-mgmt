@@ -10,7 +10,7 @@ class HAmanager(object):
     def get_pcs_client(self):
         """Gets a PCS host to retrieve pcs data from """
         host = self._ha_hosts[0]
-        return pcs.PCSMgmt(host.ssh.execute)
+        return pcs.PCSMgmt(host.ssh)
 
     def get_vip(self, service):
         VIP_SUFFIX = "public_vip"

@@ -1,5 +1,6 @@
 import functools
 from eventool import logger
+from rally import exceptions as rally_exceptions
 
 LOG = logger.getLogger(__name__)
 
@@ -24,9 +25,9 @@ class tmp_cmd(object):
     allign = 20
     out_format = '{pre:<10}:{prnt:>{allign}}'
 
-    def __init__(self, executor):
+    def __init__(self, ssh):
         super(tmp_cmd, self).__init__()
-        self.executor = executor
+        self.executor = ssh.execute
 
     def exec_command(self, cmd):
         # log command?

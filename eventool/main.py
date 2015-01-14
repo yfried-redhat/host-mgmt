@@ -82,7 +82,7 @@ def load_conf_file(path=HOSTS_CONF):
 def service_exec(args):
     target = args.target
     service = args.service
-    print getattr(servicemgmt.ServiceMgmt(target.ssh.execute), args.op)(
+    print getattr(servicemgmt.ServiceMgmt(target.ssh), args.op)(
         service)
 
 
@@ -91,7 +91,7 @@ def pcs_exec(args):
     to_args = []
     if args.service:
         to_args.append(args.service)
-    print getattr(pcs.PCSMgmt(target.ssh.execute), args.op)(*to_args)
+    print getattr(pcs.PCSMgmt(target.ssh), args.op)(*to_args)
 
 
 def ha_exec(args):
@@ -104,16 +104,7 @@ def ha_exec(args):
 def raw_exec(args):
     target = args.target
     cmd = " ".join(args.command)
-    print ssh_cmds.RAWcmd(target.ssh.execute).raw_cmd(cmd)
-
-
-def send_cmd(target, cmd=""):
-    code, out, err = target.ssh.execute(cmd)
-    if code:
-        LOG.warn("cmd: '{cmd}' Returned with error code: {code}. msg: {msg}".
-                 format(cmd=cmd, code=code, msg=err))
-    LOG.debug(out)
-    return out, err
+    print ssh_cmds.RAWcmd(target.ssh).raw_cmd(cmd)
 
 
 def script_exec(args):

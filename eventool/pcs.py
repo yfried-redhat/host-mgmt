@@ -11,8 +11,8 @@ LOG = logger.getLogger(__name__)
 
 class PCSMgmt(ssh_cmds.tmp_cmd):
 
-    def __init__(self, executor):
-        super(PCSMgmt, self).__init__(executor)
+    def __init__(self, ssh):
+        super(PCSMgmt, self).__init__(ssh)
         self._dict_xml = None
         self._cluster = None
         # self._haproxy_conf = None
