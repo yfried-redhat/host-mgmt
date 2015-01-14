@@ -4,6 +4,8 @@ eventool
 Temp version
 
 Installation guide:
+===================
+
 * Install git:
   * yum install git
 * Rally is required
@@ -19,3 +21,33 @@ Installation guide:
   * edit
 * Remove eventool:
   * cat files.txt | sudo xargs rm -rf
+
+
+Commands:
+=========
+
+    * service
+        TARGET service OP SERVICE
+        
+        OPs:
+        * status
+        * stop
+        * start
+        * restart
+
+    * raw
+        TARGET raw COMMAND
+        
+    * script
+        TARGET script INTERPRETER FILE
+        
+        INTERPRETER - program to execute script with (/bin/bash, /bin/python...)
+        FILE - path to script
+    
+    * pcs
+    * ha_manage
+        TARGET ha_manage OP service
+        
+        TARGET - role of HA machines
+        OPs:
+        * find_service - finds the fixed ip of the HA node currently running the service
