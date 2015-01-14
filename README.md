@@ -11,7 +11,7 @@ Installation guide:
 * Clone eventool:
   * git clone https://github.com/yfried-redhat/eventool.git
   * cd eventool
-  * git checkout stable
+  * git checkout stable_product
 * Install eventool:
   * [sudo] python setup.py install [--record files.txt]
 * Create your hosts_conf:
