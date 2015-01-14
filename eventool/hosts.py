@@ -19,6 +19,14 @@ class Host(object):
         self.user = user
         self._ssh = None
 
+    def __str__(self):
+        return self.address
+
+    def __repr__(self):
+        return "Host: address: {add} aliases: {als}".format(add=self.address,
+                                                            als=self.alias)
+
+
     def is_host(self, hostname):
         return hostname == self.address or hostname in self.alias
 
@@ -43,6 +51,10 @@ class Hosts(object):
 
         for role, hosts in hosts_conf["roles"].iteritems():
             for address, host in hosts.iteritems():
+                if self._hosts.get(address):
+                    raise Exception("found duplicate address %s. role: %s. "
+                                    "existing: %s" %
+                                    (address, role, self._hosts[address]))
                 host_init = dict(self._defaults)
                 host_init.update(host)
                 self._hosts[address] = Host(address=address,

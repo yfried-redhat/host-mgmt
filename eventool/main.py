@@ -3,9 +3,11 @@ import sys
 import yaml
 
 from eventool import logger
+from eventool import ha_manage
 from eventool import hosts
+from eventool import pcs
 from eventool import ssh_cmds
-import servicemgmt
+from eventool import servicemgmt
 
 
 HOSTS_CONF = "etc/hosts_conf.yaml"
@@ -45,6 +47,21 @@ def parse_arguments():
                          help="service to work on")
     service.set_defaults(func=service_exec)
 
+    pcs = subparse.add_parser('pcs', help="service help")
+    pcs.add_argument("op",
+                         help="operation to execute on service")
+    pcs.add_argument("service", nargs='?',
+                     help="service to work on")
+    pcs.set_defaults(func=pcs_exec)
+    ha = subparse.add_parser('ha_manage', help="service help")
+    ha.add_argument("op",
+                         help="operation to execute on service")
+    ha.add_argument("service", nargs='?',
+                     help="service to work on")
+    ha.set_defaults(func=ha_exec)
+
+
+
     # TODO(yfried): add this option to parse lists
     # parser.add_argument("--hosts",
     #                     help="a list of remote hosts. ip, FQDN, aliases, "
@@ -67,6 +84,21 @@ def service_exec(args):
     service = args.service
     print getattr(servicemgmt.ServiceMgmt(target.ssh.execute), args.op)(
         service)
+
+
+def pcs_exec(args):
+    target = args.target
+    to_args = []
+    if args.service:
+        to_args.append(args.service)
+    print getattr(pcs.PCSMgmt(target.ssh.execute), args.op)(*to_args)
+
+
+def ha_exec(args):
+    service = args.service
+    ha_hosts = args.target
+    vips = args.conf.find_hosts("vip")
+    print getattr(ha_manage.HAmanager(ha_hosts, vips), args.op)(service)
 
 
 def raw_exec(args):
@@ -100,7 +132,8 @@ def script_exec(args):
 def main():
     hosts_from_conf = load_conf_file()
     args = parse_arguments()
-    args.target = hosts_from_conf.find_hosts(args.target)
+    args.conf = hosts_from_conf
+    args.target = args.conf.find_hosts(args.target)
     args.func(args)
 
 if __name__ == "__main__":

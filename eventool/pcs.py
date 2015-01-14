@@ -3,8 +3,8 @@ import json
 from eventool import ssh_cmds
 from eventool import logger
 import xmltodict
-from lxml import etree as xml_parser
-# from xml.dom import minidom as xml_parser
+# from lxml import etree as xml_parser
+from xml.dom import minidom as xml_parser
 
 LOG = logger.getLogger(__name__)
 
@@ -13,7 +13,7 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
 
     def __init__(self, executor):
         super(PCSMgmt, self).__init__(executor)
-        self.dict_xml = None
+        self._dict_xml = None
         self._cluster = None
         # self._haproxy_conf = None
 
@@ -44,14 +44,31 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
         return cmd, self._parse_xml
 
     def _parse_xml(self, raw_xml):
-        self.dict_xml = xmltodict.parse(raw_xml)
+        self._dict_xml = xmltodict.parse(raw_xml)
         # return xml_parser.parseString(raw_xml)
-        return xml_parser.fromstring(raw_xml)
+        return xml_parser.parseString(raw_xml)
 
-    def find_service(self, service):
-        resource = self.find_resource(self.cluster, service)
-        node = resource.find("node")
-        return node.attrib["name"]
+    def find_service_node(self, service):
+        resources = self.find_resource(service)
+        if not resources:
+            # TODO(yfried): replace with a better exception
+            raise Exception("resource {0} NotFound".
+                            format(service))
+        if len(resources) > 1:
+            # TODO(yfried): replace with a better exception
+            raise Exception("Found multiple matches for resource {s}".
+                            format(service))
+
+        resource = resources.pop()
+        [node] = resource.getElementsByTagName("node")
+        return node.getAttribute("name")
+
+    def get_vip_dest(self, vip):
+        vip_prefix = "ip-"
+        vips = self.find_resource(vip_prefix + vip)
+        vip_resource = vips.pop()
+        [node] = vip_resource.getElementsByTagName("node")
+        return node.getAttribute("name")
 
     @staticmethod
     def strip_node_name(name):
@@ -59,23 +76,25 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
         assert name.startswith(prefix)
         return name[len(prefix):]
 
-    def find_resource(self, root, resource):
+    @staticmethod
+    def _find_in_tree(root, tag, id):
+        return [r for r in root.getElementsByTagName(tag)
+                if r.getAttribute("id") == id]
 
-        x = root.xpath("//resource[@id='%s']" % resource)
-        if len(x) > 1:
+    def find_clone(self, service):
+        TAG = "clone"
+        service = "%s-clone" % service
+        x_list = self._find_in_tree(self.cluster, TAG, service)
+        if len(x_list) > 1:
             # TODO(yfried): replace with a better exception
-            raise Exception("Found multiple matches for resource {s} in {r}".
-                            format(s=resource, r=root.att))
-        if not x:
-            # TODO(yfried): replace with a better exception
-            raise Exception("resource {s} NotFound in {r}".
-                            format(s=resource, r=root.att))
-        return x.pop()
+            raise Exception("Found multiple matches for clone {s}".
+                            format(service))
+        return x_list
 
-    # def __getattr__(self, name):
-    #     if name.startswith("cluster_"):
-    #         key = name.split("_", 1)[-1]
-    #     return super(PCSMgmt, self).__getattribute__(name)
+    def find_resource(self, resource_id):
+        TAG = "resource"
+        x_list = self._find_in_tree(self.cluster, TAG, resource_id)
+        return x_list
 
     def cluster_nodes(self):
         out = self.cluster.get("nodes")["node"]
