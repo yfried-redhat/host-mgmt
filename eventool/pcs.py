@@ -79,7 +79,7 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
     @staticmethod
     def _find_in_tree(root, tag, id):
         return [r for r in root.getElementsByTagName(tag)
-                if r.getAttribute("id") == id]
+                if r.getAttribute("id") == id   ]
 
     def find_clone(self, service):
         TAG = "clone"
