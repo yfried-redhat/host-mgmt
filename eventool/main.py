@@ -11,7 +11,6 @@ from eventool import ssh_cmds
 from eventool import servicemgmt
 
 
-HOSTS_CONF = os.environ.get("HOSTS_CONF", "/etc/eventool/hosts_conf.yaml")
 LOG = logger.getLogger(__name__)
 
 
@@ -73,11 +72,6 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def load_conf_file(path=HOSTS_CONF):
-    with open(path) as conf_data:
-        yaml_conf = yaml.load(conf_data)
-
-    return hosts.Hosts(yaml_conf)
 
 
 def service_exec(args):
@@ -122,7 +116,7 @@ def script_exec(args):
 
 
 def main():
-    hosts_from_conf = load_conf_file()
+    hosts_from_conf = hosts.Hosts()
     args = parse_arguments()
     args.conf = hosts_from_conf
     args.target = args.conf.find_hosts(args.target)
