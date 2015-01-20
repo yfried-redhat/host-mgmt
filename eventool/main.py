@@ -74,9 +74,9 @@ def parse_arguments():
 
 def load_conf_file(path=HOSTS_CONF):
     with open(path) as conf_data:
-        json_conf = yaml.load(conf_data)
+        yaml_conf = yaml.load(conf_data)
 
-    return hosts.Hosts(json_conf)
+    return hosts.Hosts(yaml_conf)
 
 
 def service_exec(args):
