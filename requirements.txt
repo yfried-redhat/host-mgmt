@@ -76,3 +76,5 @@ warlock==1.1.0
 WebOb==1.4
 WebTest==2.0.17
 WSME==0.6.4
+rally==0.0.1.dev60
+xmltodict
