@@ -65,7 +65,7 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
 
     def get_vip_dest(self, vip):
         vip_prefix = "ip-"
-        vips = self.find_resource(vip_prefix + vip)
+        vips = self.find_resource(vip, exact_match=False)
         vip_resource = vips.pop()
         [node] = vip_resource.getElementsByTagName("node")
         return node.getAttribute("name")
@@ -77,9 +77,10 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
         return name[len(prefix):]
 
     @staticmethod
-    def _find_in_tree(root, tag, id):
+    def _find_in_tree(root, tag, id, exact=True):
+        match = "__eq__" if exact else "__contains__"
         return [r for r in root.getElementsByTagName(tag)
-                if r.getAttribute("id") == id]
+                if getattr(r.getAttribute("id"), match)(id)]
 
     def find_clone(self, service):
         TAG = "clone"
@@ -91,9 +92,17 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
                             format(service))
         return x_list
 
-    def find_resource(self, resource_id):
+    def find_resource(self, resource_id, exact_match=True):
+        """
+
+        :param resource_id: name of the resource
+        :param exact_match: if False - return any resource whose name
+        contains the :resource_id
+        :return:
+        """
         TAG = "resource"
-        x_list = self._find_in_tree(self.cluster, TAG, resource_id)
+        x_list = self._find_in_tree(self.cluster, TAG, resource_id,
+                                    exact=exact_match)
         return x_list
 
     def cluster_nodes(self):
