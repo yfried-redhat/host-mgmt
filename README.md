@@ -14,7 +14,7 @@ Installation guide:
 * Install eventool  
     `[sudo] python setup.py install [--record files.txt]`
 * Create your hosts\_conf  
-    `cp etc/hosts_conf.yaml.sample etc/hosts_conf.yaml`  
+    `cp etc/hosts_conf.yaml.sample /etc/eventool/hosts_conf.yaml`  
 edit `etc/host_conf.yaml`
 * Remove eventool  
     `cat files.txt | sudo xargs rm -rf`
@@ -23,7 +23,7 @@ edit `etc/host_conf.yaml`
 
 Configuration file:
 ---------------------
-Configuration file is in `eventool/etc/hosts_conf.yaml`  
+By default, configuration file is in `eventool/etc/hosts_conf.yaml`. To change that, set environment variable `export HOSTS_CONF=</path/to/file.suffix>`
 
 * Default values for all servers. Each value can be overridden for specific node  
   * password  
