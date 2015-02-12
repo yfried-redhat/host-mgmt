@@ -1,4 +1,5 @@
 import argparse
+import os
 import sys
 import yaml
 
@@ -10,7 +11,7 @@ from eventool import ssh_cmds
 from eventool import servicemgmt
 
 
-HOSTS_CONF = "etc/hosts_conf.yaml"
+HOSTS_CONF = os.environ.get("HOSTS_CONF", "/etc/eventool/hosts_conf.yaml")
 LOG = logger.getLogger(__name__)
 
 
