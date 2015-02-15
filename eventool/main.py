@@ -17,51 +17,68 @@ LOG = logger.getLogger(__name__)
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("target",
-                        help="remote host: ip, FQDN, or alias for a "
-                             "single host. host_role is also possible to "
-                             "work on "
-                             "multiple matching hosts")
+    # parser.add_argument("target",
+    #                     help="remote host: ip, FQDN, or alias for a "
+    #                          "single host. host_role is also possible to "
+    #                          "work on "
+    #                          "multiple matching hosts")
     parser.add_argument("--version", action='version',
                         version=version.version_string())
     # parser.set_defaults(func=lambda: version.version_string())
-    subparse = parser.add_subparsers()
-
-    # scripts
+    subparse = parser.add_subparsers(title="Parsers", metavar="PARSER")
     script = subparse.add_parser("script", help="run script on host using "
                                                 "interpreter")
+    raw = subparse.add_parser("raw",
+                              help="send the command directly to host(s)")
+    service = subparse.add_parser('service', help="preform op on service")
+    pcs = subparse.add_parser('pcs', help="TBA")
+
+    # parsers = [script, raw, service, pcs]
+
+    for _parser_name, p in subparse.choices.iteritems():
+        p.add_argument("target",
+                       help="remote host: ip, FQDN, or alias for a "
+                            "single host. host_role is also possible to "
+                            "work on "
+                            "multiple matching hosts")
+
+    # HA needs different details for TARGET
+    ha = subparse.add_parser('ha_manage', help="HA related operations")
+
+    # scripts
     script.add_argument("interpreter",
                         help="program to execute script with")
     script.add_argument("script",
                         help="Path to script")
     script.set_defaults(func=script_exec)
 
-    raw = subparse.add_parser("raw",
-                              help="send the command directly to host(s)")
-
+    # raw
     raw.add_argument("command", nargs='*',
                      help="send the command directly to host(s)",
                      default=None)
     raw.set_defaults(func=raw_exec)
 
-    service = subparse.add_parser('service', help="service help")
+    # service
     service.add_argument("op",
                          help="operation to execute on service")
     service.add_argument("service",
                          help="service to work on")
     service.set_defaults(func=service_exec)
 
-    pcs = subparse.add_parser('pcs', help="service help")
+    # pcs
     pcs.add_argument("op",
-                         help="operation to execute on service")
+                     help="operation to execute on service")
     pcs.add_argument("service", nargs='?',
                      help="service to work on")
     pcs.set_defaults(func=pcs_exec)
-    ha = subparse.add_parser('ha_manage', help="service help")
+
+    # HA
+    ha.add_argument("target", metavar="HA-ROLE",
+                    help="Role of HA nodes")
     ha.add_argument("op",
-                         help="operation to execute on service")
-    ha.add_argument("service", nargs='?',
-                     help="service to work on")
+                    help="operation to execute on service")
+    ha.add_argument("service",
+                    help="service to work on")
     ha.set_defaults(func=ha_exec)
 
 

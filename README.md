@@ -63,11 +63,11 @@ Commands:
     INTERPRETER - program to execute script with (`/bin/bash`, `/bin/python`...)  
     FILE - path to script
 
-* `pcs`
+* `pcs` - TBD
 * `ha_manage`  
     `TARGET ha_manage OP service`
     
-  TARGET - role of HA machines    
+  HA-ROLE - role of HA machines    
   OP:  
     * `find_service` - finds the fixed ip of the HA node currently running the service  
   
