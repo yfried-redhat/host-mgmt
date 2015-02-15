@@ -34,15 +34,7 @@ def cli_choice(parser, handler=None):
     
         @functools.wraps(f)
         def func(self, *args, **kwargs):
-            cmd, parser = f(self, *args, **kwargs)
-            out = self.exec_command(cmd)
-            out = parser(out) if parser else out
-            # cmd_dict = dict(cmd=cmd, out=out)
-            LOG.info(self.out_format.format(pre='output', prnt=out,
-                                            allign=self.allign))
-            # LOG.info(json.dumps(cmd_dict))
-            # LOG.info(str(cmd_dict))
-            return out
+            return f(self, *args, **kwargs)
         return func
     return decorator
 
