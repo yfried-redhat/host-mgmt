@@ -33,11 +33,13 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
     #     return cmd, HAProxy
 
 
+    @ssh_cmds.cli_choice(parser="pcs", handler="op")
     @ssh_cmds.command_decorator
     def status(self):
         cmd = "pcs status"
         return cmd, self._noop_parser
 
+    @ssh_cmds.cli_choice(parser="pcs", handler="op")
     @ssh_cmds.command_decorator
     def status_xml(self):
         cmd = "crm_mon -X"

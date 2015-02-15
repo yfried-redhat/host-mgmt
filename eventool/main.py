@@ -10,6 +10,7 @@ from eventool import pcs
 from eventool import ssh_cmds
 from eventool import servicemgmt
 from eventool import version
+from eventool import parsers
 
 
 LOG = logger.getLogger(__name__)
@@ -60,15 +61,17 @@ def parse_arguments():
 
     # service
     service.add_argument("op",
-                         help="operation to execute on service")
+                         help="operation to execute on service",
+                         choices=parsers.PARSERS["service"]["op"])
     service.add_argument("service",
                          help="service to work on")
     service.set_defaults(func=service_exec)
 
     # pcs
     pcs.add_argument("op",
-                     help="operation to execute on service")
-    pcs.add_argument("service", nargs='?',
+                     help="operation to execute on service",
+                     choices=parsers.PARSERS["pcs"]["op"])
+    pcs.add_argument("service", # nargs='?',
                      help="service to work on")
     pcs.set_defaults(func=pcs_exec)
 
@@ -76,7 +79,8 @@ def parse_arguments():
     ha.add_argument("target", metavar="HA-ROLE",
                     help="Role of HA nodes")
     ha.add_argument("op",
-                    help="operation to execute on service")
+                    help="operation to execute on service",
+                     choices=parsers.PARSERS["ha"]["op"])
     ha.add_argument("service",
                     help="service to work on")
     ha.set_defaults(func=ha_exec)

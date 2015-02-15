@@ -1,4 +1,5 @@
 from eventool import pcs
+from eventool import ssh_cmds
 
 
 class HAmanager(object):
@@ -28,6 +29,7 @@ class HAmanager(object):
                             format(v=vip_alias, s=service))
         return vip
 
+    @ssh_cmds.cli_choice(parser="ha", handler="op")
     def find_service(self, service):
         """
         search order:
