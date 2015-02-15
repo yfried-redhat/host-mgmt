@@ -9,7 +9,6 @@ from eventool import hosts
 from eventool import pcs
 from eventool import ssh_cmds
 from eventool import servicemgmt
-from eventool import version
 
 
 LOG = logger.getLogger(__name__)
@@ -22,9 +21,6 @@ def parse_arguments():
                              "single host. host_role is also possible to "
                              "work on "
                              "multiple matching hosts")
-    parser.add_argument("--version", action='version',
-                        version=version.version_string())
-    # parser.set_defaults(func=lambda: version.version_string())
     subparse = parser.add_subparsers()
 
     # scripts
