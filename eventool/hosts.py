@@ -9,13 +9,6 @@ LOG = logger.getLogger(__name__)
 CONF_PATH = os.environ.get("HOSTS_CONF", "/etc/eventool/hosts_conf.yaml")
 
 
-def load_conf_file(path=CONF_PATH):
-    with open(path) as conf_data:
-        return yaml.load(conf_data)
-
-HOSTS_CONF = load_conf_file()
-
-
 class Host(object):
     def __init__(self, address, user, alias=None, password=None,
                  private_key=None, os=None):
@@ -58,8 +51,10 @@ class Host(object):
 
 
 class Hosts(object):
-    def __init__(self, hosts_conf=HOSTS_CONF):
+    def __init__(self, path=CONF_PATH):
         super(Hosts, self).__init__()
+        with open(path) as conf_data:
+            hosts_conf = yaml.load(conf_data)
         self._defaults = dict()
         self._hosts = dict()
         for attribute in ["password", "os", "private_key", "user"]:
