@@ -1,4 +1,5 @@
 import functools
+import argparse
 from eventool import logger
 from rally import exceptions as rally_exceptions
 
