@@ -141,8 +141,8 @@ def script_exec(args):
 
 
 def main():
-    hosts_from_conf = hosts.Hosts()
     args = parse_arguments()
+    hosts_from_conf = hosts.Hosts()
     args.conf = hosts_from_conf
     args.target = args.conf.find_hosts(args.target)
     args.func(args)
