@@ -16,10 +16,12 @@ hosts:
       - "macf04da2732fb1.example.com"
   10.35.173.181:
     alias:
+      - mac848f69fbc493
       - "mac848f69fbc493.example.com"
   10.35.173.182:
     alias:
       - "mac848f69fbc49f.example.com"
+      - mac848f69fbc49f
 
 roles:
   ha_controller:
