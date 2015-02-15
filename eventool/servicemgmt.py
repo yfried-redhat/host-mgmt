@@ -10,10 +10,12 @@ LOG = logger.getLogger(__name__)
 class ServiceMgmt(ssh_cmds.tmp_cmd):
     CMD = "systemctl {op} {service}"
 
+    @ssh_cmds.cli_choice(parser="service", handler="op")
     @ssh_cmds.command_decorator
     def stop(self, service):
         return self.CMD.format(op='stop', service=service), self._empty_parser
 
+    @ssh_cmds.cli_choice(parser="service", handler="op")
     @ssh_cmds.command_decorator
     def start(self, service):
         return self.CMD.format(op='start', service=service), self._empty_parser
@@ -75,5 +77,6 @@ class ServiceMgmt(ssh_cmds.tmp_cmd):
         return cmd, self._status_parser
 
     # no @command_decorator because we are executing another command
+    @ssh_cmds.cli_choice(parser="service", handler="op")
     def status(self, service):
         return self.state(service)

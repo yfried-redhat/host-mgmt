@@ -1,6 +1,7 @@
 import functools
 import argparse
 from eventool import logger
+from eventool import parsers
 from rally import exceptions as rally_exceptions
 
 LOG = logger.getLogger(__name__)
@@ -19,6 +20,31 @@ def command_decorator(f):
         # LOG.info(str(cmd_dict))
         return out
     return execute_and_parse
+
+
+def cli_choice(parser, handler=None):
+    if handler:
+        parsers.PARSERS.setdefault(parser, {})
+        parsers.PARSERS[parser].setdefault(handler, [])
+    
+    def decorator(f):
+        if handler:
+            name = f.func_name
+            parsers.PARSERS[parser][handler].append(name)
+    
+        @functools.wraps(f)
+        def func(self, *args, **kwargs):
+            cmd, parser = f(self, *args, **kwargs)
+            out = self.exec_command(cmd)
+            out = parser(out) if parser else out
+            # cmd_dict = dict(cmd=cmd, out=out)
+            LOG.info(self.out_format.format(pre='output', prnt=out,
+                                            allign=self.allign))
+            # LOG.info(json.dumps(cmd_dict))
+            # LOG.info(str(cmd_dict))
+            return out
+        return func
+    return decorator
 
 
 # TODO(yfried): name this better
@@ -57,7 +83,18 @@ class tmp_cmd(object):
         return out
 
 
+# def parser_exec(parser):
+#     main.PARSERS[parser]["func"]
+#     def decorator(c):
+#         @functools.wraps(c)
+#         def class_dec(*args, **kwargs):
+#             return c(*args, **kwargs)
+#         return class_dec
+#     return decorator
+
+
 class RAWcmd(tmp_cmd):
+    _parser = "raw"
 
     @command_decorator
     def raw_cmd(self, cmd):
