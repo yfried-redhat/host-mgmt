@@ -1,6 +1,6 @@
 import argparse
-import os
 import sys
+
 import yaml
 
 from eventool import logger
@@ -11,6 +11,7 @@ from eventool import ssh_cmds
 from eventool import servicemgmt
 from eventool import version
 from eventool import parsers
+from eventool.parsers import hosts_parser
 
 
 LOG = logger.getLogger(__name__)
@@ -36,6 +37,7 @@ def parse_arguments():
                               help="send the command directly to host(s)")
     service = subparse.add_parser('service', help="preform op on service")
     pcs = subparse.add_parser('pcs', help="TBA")
+    hosts_parser = subparse.add_parser("hosts", help="get host info")
 
     # parsers = [script, raw, service, pcs]
 
@@ -87,6 +89,13 @@ def parse_arguments():
     ha.add_argument("service",
                     help="service to work on")
     ha.set_defaults(func=ha_exec)
+
+    # hosts
+    hosts_parser.add_argument("op",
+                    help="operation to execute on host",
+                     choices=parsers.PARSERS["hosts"]["op"])
+
+    hosts_parser.set_defaults(func=hosts_exec)
 
 
 
@@ -142,6 +151,11 @@ def script_exec(args):
     LOG.info(out)
     return out, err
 
+
+def hosts_exec(args):
+    target = args.target
+    h = getattr(hosts_parser.HostsParser(), args.op)(target)
+    print yaml.safe_dump(h, default_flow_style=False)
 
 def main():
     args = parse_arguments()
