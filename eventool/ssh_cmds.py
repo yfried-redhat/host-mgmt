@@ -13,8 +13,8 @@ def command_decorator(f):
         out = self.exec_command(cmd)
         out = parser(out) if parser else out
         # cmd_dict = dict(cmd=cmd, out=out)
-        LOG.info(self.out_format.format(pre='ouptut', prnt=out,
-                                        allign=self.allign))
+        # LOG.info(self.out_format.format(pre='ouptut', prnt=out,
+        #                                 allign=self.allign))
         # LOG.info(json.dumps(cmd_dict))
         # LOG.info(str(cmd_dict))
         return out
@@ -48,14 +48,11 @@ class tmp_cmd(object):
         self.executor = ssh.execute
 
     def exec_command(self, cmd):
-        # log command?
-
         code, out, err = self.executor(cmd)
         if code != 0:
             # TODO(yfried): add a better exception
             raise Exception('failure {code:d} running: {cmd} '
                             '{err}'.format(code=code, cmd=cmd, err=err))
-        LOG.debug(out)
         return out
 
     @staticmethod

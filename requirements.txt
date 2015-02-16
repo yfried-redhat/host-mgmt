@@ -1,5 +1,4 @@
 # Extends Rally requirements
-PyYAML>=3.11
 ecdsa>=0.13
 paramiko>=1.15.2
 pbr>=0.10.7

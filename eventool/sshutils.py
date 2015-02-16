@@ -70,7 +70,7 @@ from eventool import logger
 
 
 LOG = logger.getLogger(__name__)
-
+log_fmt = 'host:{host} cmd:"{cmd}" '
 
 class SSHError(Exception):
     pass
@@ -163,6 +163,7 @@ class SSH(object):
     def _run(self, client, cmd, stdin=None, stdout=None, stderr=None,
              raise_on_error=True, timeout=3600):
 
+        formated_log = log_fmt.format(cmd=cmd, host=self.host)
         transport = client.get_transport()
         session = transport.open_session()
         session.exec_command(cmd)
@@ -178,23 +179,27 @@ class SSH(object):
         else:
             writes = []
 
+        data = ""
+        stderr_data = ""
         while True:
             # Block until data can be read/write.
             r, w, e = select.select([session], writes, [session], 1)
 
             if session.recv_ready():
-                data = session.recv(4096)
-                LOG.debug("stdout: %r" % data)
+                data += session.recv(4096)
+                continue
+            elif data:
+                LOG.debug(formated_log + "stdout: %s" % data)
                 if stdout is not None:
                     stdout.write(data)
-                continue
 
             if session.recv_stderr_ready():
-                stderr_data = session.recv_stderr(4096)
-                LOG.debug("stderr: %r" % stderr_data)
+                stderr_data += session.recv_stderr(4096)
+                continue
+            elif stderr_data:
+                LOG.debug(formated_log + "stderr: %s" % stderr_data)
                 if stderr is not None:
                     stderr.write(stderr_data)
-                continue
 
             if session.send_ready():
                 if stdin is not None and not stdin.closed:
@@ -206,7 +211,7 @@ class SSH(object):
                             writes = []
                             continue
                     sent_bytes = session.send(data_to_send)
-                    LOG.debug("sent: %s" % data_to_send[:sent_bytes])
+                    LOG.debug(formated_log + "sent: %s" % data_to_send[:sent_bytes])
                     data_to_send = data_to_send[sent_bytes:]
 
             if session.exit_status_ready():
