@@ -22,20 +22,9 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
         self._cluster = self._cluster or self.status_xml()
         return self._cluster
 
-    # @property
-    # def haproxy(self):
-    #     self._haproxy_conf = self._haproxy_conf or self._get_haproxy_conf()
-    #     return self._haproxy_conf
-
-    # @ssh_cmds.command_decorator
-    # def _get_haproxy_conf(self,):
-    #     cmd = "cat /etc/haproxy/haproxy.cfg"
-    #     return cmd, HAProxy
-
-
     @ssh_cmds.cli_choice(parser="pcs", handler="op")
     @ssh_cmds.command_decorator
-    def status(self):
+    def status(self, *args):
         cmd = "pcs status"
         return cmd, self._noop_parser
 
@@ -107,36 +96,7 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
                                     exact=exact_match)
         return x_list
 
-    def cluster_nodes(self):
-        out = self.cluster.get("nodes")["node"]
-        print json.dumps(out)
-
-
-# class HAProxy(object):
-#     def __init__(self, raw_file):
-#         super(HAProxy, self).__init__()
-#         self._services = {}
-#         for block in raw_file.split('\n\n'):
-#             if not block.startswith("listen"):
-#                 continue
-#             lines = block.splitlines()
-#             _listen, service = lines.pop(0).split(" ", 1)
-#             assert service not in self._services
-#             serv = {}
-#             splitlines = [l.strip().split() for l in lines]
-#             serv["vips"] = [a[1].split(":", 1)[0] for a in splitlines
-#                             if a[0] == "bind"]
-#             serv["hosts"] = [a[1].rsplit('-', 1)[-1] for a in splitlines
-#                              if a[0] == "server"]
-#             self._services[service] = serv
-#
-#     def __getitem__(self, item):
-#         try:
-#             return self._services[item]
-#         except KeyError as err:
-#             if not err.args:
-#                 err.args = ('',)
-#             err.args = (err.args[0] + "service {s} not in ha_proxy".
-#                         format(s=item),) + err.args[1:]
-#             raise
-
+    # @ssh_cmds.cli_choice(parser="pcs", handler="op")
+    # def cluster_nodes(self):
+    #     out = self.cluster.get("nodes")["node"]
+    #     return json.dumps(out)
