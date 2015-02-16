@@ -109,8 +109,8 @@ def service_exec(args):
 def pcs_exec(args):
     target = args.target
     to_args = []
-    if args.service:
-        to_args.append(args.service)
+    # if args.service:
+    #     to_args.append(args.service)
     print getattr(pcs.PCSMgmt(target.ssh), args.op)(*to_args)
 
 
