@@ -71,8 +71,8 @@ def parse_arguments():
     pcs.add_argument("op",
                      help="operation to execute on service",
                      choices=parsers.PARSERS["pcs"]["op"])
-    pcs.add_argument("service", # nargs='?',
-                     help="service to work on")
+    # pcs.add_argument("service", nargs='?',
+    #                  help="service to work on")
     pcs.set_defaults(func=pcs_exec)
 
     # HA
