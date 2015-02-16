@@ -1,6 +1,6 @@
 import functools
 import os
-from rally.common import sshutils as rally_ssh
+from eventool import sshutils
 import yaml
 
 from eventool import logger
@@ -38,10 +38,10 @@ class Host(object):
     @property
     def ssh(self):
         if not self._ssh:
-            ssh = rally_ssh.SSH(user=self.user,
-                                              host=self.address,
-                                     key_filename=self.private_key,
-                                     password=self.password)
+            ssh = sshutils.SSH(user=self.user,
+                               host=self.address,
+                               key_filename=self.private_key,
+                               password=self.password)
             ssh._get_client()
             # except Exception as e:
             #     raise Exception("no connection to %s" % ssh.host)
