@@ -2,7 +2,6 @@ import functools
 import argparse
 from eventool import logger
 from eventool import parsers
-from rally import exceptions as rally_exceptions
 
 LOG = logger.getLogger(__name__)
 
