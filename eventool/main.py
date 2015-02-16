@@ -25,6 +25,7 @@ def parse_arguments():
     #                          "multiple matching hosts")
     parser.add_argument("--version", action='version',
                         version=version.version_string())
+    # parser.add_argument("--debug", "-d")
     # parser.set_defaults(func=lambda: version.version_string())
     subparse = parser.add_subparsers(title="Parsers", metavar="PARSER")
     script = subparse.add_parser("script", help="run script on host using "
