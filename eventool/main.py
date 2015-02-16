@@ -25,7 +25,9 @@ def parse_arguments():
     #                          "multiple matching hosts")
     parser.add_argument("--version", action='version',
                         version=version.version_string())
-    # parser.add_argument("--debug", "-d")
+    parser.add_argument('--debug', '-d', action='store_true',
+                        default=False,
+                        help='print debug messages to stderr')
     # parser.set_defaults(func=lambda: version.version_string())
     subparse = parser.add_subparsers(title="Parsers", metavar="PARSER")
     script = subparse.add_parser("script", help="run script on host using "
@@ -143,6 +145,8 @@ def script_exec(args):
 
 def main():
     args = parse_arguments()
+    if args.debug:
+        logger.console.setLevel(logger.logging.DEBUG)
     hosts_from_conf = hosts.Hosts()
     args.conf = hosts_from_conf
     args.target = args.conf.find_hosts(args.target)
