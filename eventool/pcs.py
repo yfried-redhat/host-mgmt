@@ -36,8 +36,8 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
 
     def _parse_xml(self, raw_xml):
         self._dict_xml = xmltodict.parse(raw_xml)
+        return raw_xml
         # return xml_parser.parseString(raw_xml)
-        return xml_parser.parseString(raw_xml)
 
     def find_service_node(self, service):
         resources = self.find_resource(service)
