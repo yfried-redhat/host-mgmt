@@ -61,8 +61,7 @@ class Hosts(object):
             if hosts_conf.get(attribute):
                 self._defaults[attribute] = hosts_conf.get(attribute)
 
-        iteritems_ = dict(hosts_conf["hosts"], **hosts_conf["vip"]).iteritems()
-        for address, host in iteritems_:
+        for address, host in hosts_conf["hosts"].iteritems():
             if self._hosts.get(address):
                 raise Exception("found duplicate address %s. "
                                 "existing: %s" %
@@ -76,10 +75,6 @@ class Hosts(object):
             for h in hosts:
                 host = self.find_hosts(h)
                 host.add_roles(role)
-
-        for ip in hosts_conf["vip"]:
-            self.find_hosts(ip).add_roles("vip")
-
 
     def get_host_role(self, host_role):
         return [host for h, host in self._hosts.iteritems()
