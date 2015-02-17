@@ -3,10 +3,9 @@ from eventool import ssh_cmds
 
 
 class HAmanager(object):
-    def __init__(self, ha_hosts, vips):
+    def __init__(self, ha_hosts):
         super(HAmanager, self).__init__()
         self._ha_hosts = ha_hosts
-        self._vips = vips
 
     def get_pcs_client(self):
         """Gets a PCS host to retrieve pcs data from """
@@ -14,6 +13,13 @@ class HAmanager(object):
         return pcs.PCSMgmt(host.ssh)
 
     def get_vip(self, service):
+        """ Gets :service vip from from conf
+
+        not needed if vip can be retrieved from PCS
+
+        :param service:
+        :return:
+        """
         VIP_SUFFIX = "public_vip"
         OS_prefix = "openstack-"
 
@@ -39,13 +45,28 @@ class HAmanager(object):
         :param service:
         :return:
         """
+        OS_prefix = "openstack-"
+
+        proj = service[len(OS_prefix):] if service.startswith(OS_prefix) \
+            else service
+        proj = proj.split("-")[0]
+
         pcs_client = self.get_pcs_client()
-        if pcs_client.find_clone(service):
-            [vip] = self.get_vip(service)
-            node = pcs_client.get_vip_dest(vip.address)
-        else:
-            node = pcs_client.find_service_node(service)
-        return self._get_node(node)
+        clones = pcs_client.find_clone(service)
+        if clones:
+            clone = clones.pop()
+            resources = pcs_client.get_active_resources(clone)
+            if len(resources) > 1:
+                node = pcs_client.get_vip_dest("-".join(["ip", proj, "adm"]))
+            elif resources:
+                node = pcs_client.get_resource_node(resources.pop())
+            else:
+                # TODO(yfried): better exception
+                raise Exception("no active resources found"
+                                " for clone %s" % service)
+            return self._get_node(node)
+        # TODO(yfried): better exception
+        raise Exception("no clones found for service '%s'" % service)
 
     def _get_node(self, hostname):
         [node] = [n for n in self._ha_hosts

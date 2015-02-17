@@ -36,8 +36,12 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
 
     def _parse_xml(self, raw_xml):
         self._dict_xml = xmltodict.parse(raw_xml)
-        return raw_xml
-        # return xml_parser.parseString(raw_xml)
+        # return raw_xml
+        return xml_parser.parseString(raw_xml)
+
+    def get_resource_node(self, resource):
+        [node] = resource.getElementsByTagName("node")
+        return node.getAttribute("name")
 
     def find_service_node(self, service):
         resources = self.find_resource(service)
@@ -51,15 +55,13 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
                             format(service))
 
         resource = resources.pop()
-        [node] = resource.getElementsByTagName("node")
-        return node.getAttribute("name")
+        return self.get_resource_node(resource)
 
     def get_vip_dest(self, vip):
         vip_prefix = "ip-"
         vips = self.find_resource(vip, exact_match=False)
         vip_resource = vips.pop()
-        [node] = vip_resource.getElementsByTagName("node")
-        return node.getAttribute("name")
+        return self.get_resource_node(vip_resource)
 
     @staticmethod
     def strip_node_name(name):
@@ -82,6 +84,25 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
             raise Exception("Found multiple matches for clone {s}".
                             format(service))
         return x_list
+
+    def get_active_resources(self, clone):
+        """Returns list of active resource for :clone
+
+        list is of len=1 if clone is A/P, if clone is A/A will return all
+        resource of this clone
+
+        :param clone:
+        :return:
+        """
+        # get service name from clone name
+        service = clone.getAttribute("id")[:-len("-clone")]
+        resources = self._find_in_tree(clone, "resource", service)
+
+        def active(resource):
+            return resource.getAttribute("active") == 'true' and \
+                   resource.getAttribute("role") == 'Started'
+
+        return [r for r in resources if active(r)]
 
     def find_resource(self, resource_id, exact_match=True):
         """

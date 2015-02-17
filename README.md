@@ -34,8 +34,6 @@ Each host is defined by addresses (ip/fqdn) and attributes:
   * alias: a list of aliases for the machine
   * override default values (password, user, etc...)
   * roles: a list of roles associated with the host  
-* vips:  
-Special hosts that should contain a list of vips with aliases matching the vip description  
 * roles:  
 Each role can contain a list of aliases/addresses that will associate this role with the matching host  
 

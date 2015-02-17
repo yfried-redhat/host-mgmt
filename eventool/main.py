@@ -129,8 +129,7 @@ def pcs_exec(args):
 def ha_exec(args):
     service = args.service
     ha_hosts = args.target
-    vips = args.conf.find_hosts("vip")
-    print getattr(ha_manage.HAmanager(ha_hosts, vips), args.op)(service)
+    print getattr(ha_manage.HAmanager(ha_hosts), args.op)(service)
 
 
 def raw_exec(args):
