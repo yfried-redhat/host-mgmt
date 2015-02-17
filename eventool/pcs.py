@@ -5,6 +5,7 @@ from eventool import logger
 import xmltodict
 # from lxml import etree as xml_parser
 from xml.dom import minidom as xml_parser
+from eventool import parsers
 
 LOG = logger.getLogger(__name__)
 
@@ -22,13 +23,13 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
         self._cluster = self._cluster or self.status_xml()
         return self._cluster
 
-    @ssh_cmds.cli_choice(parser="pcs", handler="op")
+    @parsers.cli_choice(parser="pcs", subparser="op")
     @ssh_cmds.command_decorator
-    def status(self, *args):
+    def status(self):
+        """Returns full PCS status. """
         cmd = "pcs status"
         return cmd, self._noop_parser
 
-    @ssh_cmds.cli_choice(parser="pcs", handler="op")
     @ssh_cmds.command_decorator
     def status_xml(self):
         LOG.debug("Get PCS data in XML format from HA node")

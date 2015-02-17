@@ -31,15 +31,11 @@ def parse_arguments():
                         help='print debug messages to stderr')
     # parser.set_defaults(func=lambda: version.version_string())
     subparse = parser.add_subparsers(title="Parsers", metavar="PARSER")
-    script = subparse.add_parser("script", help="run script on host using "
-                                                "interpreter")
     raw = subparse.add_parser("raw",
                               help="send the command directly to host(s)")
     service = subparse.add_parser('service', help="preform op on service")
     pcs = subparse.add_parser('pcs', help="TBA")
     hosts_parser = subparse.add_parser("hosts", help="get host info")
-
-    # parsers = [script, raw, service, pcs]
 
     for _parser_name, p in subparse.choices.iteritems():
         p.add_argument("target",
@@ -51,50 +47,31 @@ def parse_arguments():
     # HA needs different details for TARGET
     ha = subparse.add_parser('ha_manage', help="HA related operations")
 
-    # scripts
-    script.add_argument("interpreter",
-                        help="program to execute script with")
-    script.add_argument("script",
-                        help="Path to script")
-    script.set_defaults(func=script_exec)
-
     # raw
-    raw.add_argument("command", nargs='*',
-                     help="send the command directly to host(s)",
-                     default=None)
+    add_subparsers(raw, parsers.PARSERS["raw"])
     raw.set_defaults(func=raw_exec)
 
     # service
-    service.add_argument("op",
-                         help="operation to execute on service",
-                         choices=parsers.PARSERS["service"]["op"])
-    service.add_argument("service",
-                         help="service to work on")
+    add_subparsers(service, parsers.PARSERS["service"])
+    # service.add_argument("op",
+    #                      help="operation to execute on service",
+    #                      choices=parsers.PARSERS["service"]["op"])
+    # service.add_argument("service",
+    #                      help="service to work on")
     service.set_defaults(func=service_exec)
 
     # pcs
-    pcs.add_argument("op",
-                     help="operation to execute on service",
-                     choices=parsers.PARSERS["pcs"]["op"])
-    # pcs.add_argument("service", nargs='?',
-    #                  help="service to work on")
+    add_subparsers(pcs, parsers.PARSERS["pcs"])
     pcs.set_defaults(func=pcs_exec)
 
     # HA
     ha.add_argument("target", metavar="HA-ROLE",
                     help="Role of HA nodes")
-    ha.add_argument("op",
-                    help="operation to execute on service",
-                     choices=parsers.PARSERS["ha"]["op"])
-    ha.add_argument("service",
-                    help="service to work on")
+    add_subparsers(ha, parsers.PARSERS["ha"])
     ha.set_defaults(func=ha_exec)
 
     # hosts
-    hosts_parser.add_argument("op",
-                    help="operation to execute on host",
-                     choices=parsers.PARSERS["hosts"]["op"])
-
+    add_subparsers(hosts_parser, parsers.PARSERS["hosts"])
     hosts_parser.set_defaults(func=hosts_exec)
 
 
@@ -109,6 +86,14 @@ def parse_arguments():
     return parser.parse_args()
 
 
+def add_subparsers(parser, parsers_dict):
+    for pname, pdict in parsers_dict.iteritems():
+        subparse = parser.add_subparsers(title=pname, metavar=pname.upper(),
+                                         dest=pname)
+        for name, details in pdict.iteritems():
+            p = subparse.add_parser(name, help=details["help"])
+            for argument in details.get("arguments", []):
+                p.add_argument(**argument)
 
 
 def service_exec(args):
@@ -136,27 +121,17 @@ def ha_exec(args):
 
 def raw_exec(args):
     target = args.target
-    cmd = " ".join(args.command)
-    print ssh_cmds.RAWcmd(target.ssh).raw_cmd(cmd)
-
-
-def script_exec(args):
-    interpreter = args.interpreter
-    script = args.script
-    target = args.target
-    code, out, err = target.ssh.execute(interpreter, stdin=open(script, "rb"))
-    if code:
-        LOG.warn("cmd: '{cmd}' Returned with error code: {code}. msg: {msg}".
-                 format(cmd="%s %s" % (interpreter, script),
-                        code=code, msg=err))
-    LOG.info(out)
-    return out, err
+    arg_names = [a["dest"] for a in
+                 parsers.PARSERS["raw"]["op"][args.op]["arguments"]]
+    kwargs = dict((n, getattr(args, n)) for n in arg_names)
+    print getattr(ssh_cmds.RAWcmd(target.ssh), args.op)(**kwargs)
 
 
 def hosts_exec(args):
     target = args.target
     h = getattr(hosts_parser.HostsParser(), args.op)(target)
     print yaml.safe_dump(h, default_flow_style=False)
+
 
 def main():
     args = parse_arguments()

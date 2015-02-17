@@ -1,7 +1,9 @@
-import functools
 import argparse
+import functools
+
 from eventool import logger
 from eventool import parsers
+
 
 LOG = logger.getLogger(__name__)
 
@@ -19,23 +21,6 @@ def command_decorator(f):
         # LOG.info(str(cmd_dict))
         return out
     return execute_and_parse
-
-
-def cli_choice(parser, handler=None):
-    if handler:
-        parsers.PARSERS.setdefault(parser, {})
-        parsers.PARSERS[parser].setdefault(handler, [])
-    
-    def decorator(f):
-        if handler:
-            name = f.func_name
-            parsers.PARSERS[parser][handler].append(name)
-    
-        @functools.wraps(f)
-        def func(self, *args, **kwargs):
-            return f(self, *args, **kwargs)
-        return func
-    return decorator
 
 
 # TODO(yfried): name this better
@@ -82,8 +67,33 @@ class tmp_cmd(object):
 
 
 class RAWcmd(tmp_cmd):
-    _parser = "raw"
-
+    @parsers.add_argument(dest="input", nargs="*", default=None)
+    @parsers.cli_choice(parser="raw", subparser="op")
     @command_decorator
-    def raw_cmd(self, cmd):
-        return cmd, None
+    def command(self, input):
+        """Execute a single command from input via SSH
+
+        :param input: input to send via ssh
+        :return:
+        """
+        if not isinstance(input, str):
+            input = " ".join(input)
+        return input, None
+
+    @parsers.add_argument("path", type=argparse.FileType("rb"))
+    @parsers.add_argument("interpreter")
+    @parsers.cli_choice(parser="raw", subparser="op")
+    def script(self, interpreter, path):
+        """Execute a script on host
+
+        :param interpreter: program that execute the script on remote host.
+            examples: "bash", "python", "/bin/bash", "/user/bin/python26"
+        :param path: Path to script file on local system
+        :return: stdout, stderr of script execution
+        """
+        code, out, err = self.executor(interpreter, stdin=path)
+        if code:
+            LOG.warn("cmd: '{cmd}' Returned with error code: {code}. msg: {msg}".
+                     format(cmd="%s %s" % (interpreter, path),
+                            code=code, msg=err))
+        return out, err

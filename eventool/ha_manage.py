@@ -1,6 +1,6 @@
+from eventool import parsers
 from eventool import logger
 from eventool import pcs
-from eventool import ssh_cmds
 
 
 LOG = logger.getLogger(__name__)
@@ -40,14 +40,12 @@ class HAmanager(object):
                             format(v=vip_alias, s=service))
         return vip
 
-    @ssh_cmds.cli_choice(parser="ha", handler="op")
+    @parsers.add_argument("service")
+    @parsers.cli_choice(parser="ha", subparser="op")
     def find_service(self, service):
-        """
-        search order:
-        1. clone
-        2. regular service
+        """Finds active node for service from HA manager
 
-        :param service:
+        :param service: name of clone registered in pcs
         :return:
         """
         OS_prefix = "openstack-"
