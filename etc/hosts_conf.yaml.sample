@@ -1,9 +1,13 @@
+# Defaults for all Hosts
 user: "root"
 password: "password"
 os: "RHEL7"
+
 hosts:
+  # address - IP or FQDN
   10.35.173.185:
     alias:
+    # List of aliases for the host
       - "mac848f69fbc4c3"
       - "mac848f69fbc4c3.example.com"
   10.35.173.184:
@@ -23,11 +27,13 @@ hosts:
       - "mac848f69fbc49f.example.com"
       - mac848f69fbc49f
 
+# Group host by role
 roles:
   ha_controller:
-    - macf04da2732fb1
+  # List can contain aliases or addresses
+    - 10.35.173.183
     - mac848f69fbc643
     - mac848f69fbc4c3
   compute:
     - mac848f69fbc49f
-    - mac848f69fbc493
+    - mac848f69fbc493.example.com
