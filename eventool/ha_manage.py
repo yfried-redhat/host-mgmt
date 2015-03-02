@@ -57,7 +57,7 @@ class HAmanager(object):
             clone = clones.pop()
             resources = pcs_client.get_active_resources(clone)
             if len(resources) > 1:
-                node = pcs_client.get_vip_dest("-".join(["ip", proj, "adm"]))
+                node = pcs_client.get_vip_dest(proj)
             elif resources:
                 node = pcs_client.get_resource_node(resources.pop())
             else:
