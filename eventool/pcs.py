@@ -57,9 +57,13 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
         resource = resources.pop()
         return self.get_resource_node(resource)
 
-    def get_vip_dest(self, vip):
-        vip_prefix = "ip-"
+    def get_vip_dest(self, proj):
+        vip = "-".join(["ip", proj, "adm"])
         vips = self.find_resource(vip, exact_match=False)
+        if not vips:
+            # todo(yfried) better exception
+            raise Exception("No vip found for: {proj}. Unable to find vip "
+                            "named: {vip}".format(proj=proj, vip=vip))
         vip_resource = vips.pop()
         return self.get_resource_node(vip_resource)
 
