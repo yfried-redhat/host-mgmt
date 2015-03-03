@@ -1,5 +1,9 @@
+from eventool import logger
 from eventool import pcs
 from eventool import ssh_cmds
+
+
+LOG = logger.getLogger(__name__)
 
 
 class HAmanager(object):
@@ -47,6 +51,7 @@ class HAmanager(object):
         """
         OS_prefix = "openstack-"
 
+        LOG.debug("Locating HA service %s" % service)
         proj = service[len(OS_prefix):] if service.startswith(OS_prefix) \
             else service
         proj = proj.split("-")[0]
@@ -57,8 +62,11 @@ class HAmanager(object):
             clone = clones.pop()
             resources = pcs_client.get_active_resources(clone)
             if len(resources) > 1:
+                LOG.debug("%s is A/A service. Searching VIP for service: %s"
+                          % (service, proj))
                 node = pcs_client.get_vip_dest(proj)
             elif resources:
+                LOG.debug("%s is A/P service. Locate active node" % service)
                 node = pcs_client.get_resource_node(resources.pop())
             else:
                 # TODO(yfried): better exception

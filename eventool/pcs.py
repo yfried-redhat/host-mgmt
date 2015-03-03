@@ -31,6 +31,7 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
     @ssh_cmds.cli_choice(parser="pcs", handler="op")
     @ssh_cmds.command_decorator
     def status_xml(self):
+        LOG.debug("Get PCS data in XML format from HA node")
         cmd = "crm_mon -X"
         return cmd, self._parse_xml
 
@@ -117,6 +118,8 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
         :return:
         """
         TAG = "resource"
+        match = "exact " if exact_match else ""
+        LOG.debug("find " + match + "match for resource %s" % resource_id)
         x_list = self._find_in_tree(self.cluster, TAG, resource_id,
                                     exact=exact_match)
         return x_list
