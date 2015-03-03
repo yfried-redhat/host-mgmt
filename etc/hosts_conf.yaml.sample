@@ -37,3 +37,9 @@ roles:
   compute:
     - mac848f69fbc49f
     - mac848f69fbc493.example.com
+
+fully_active_services:
+  # List of services that are Active/Active but don't use VIP
+  - neutron-l3-agent
+  - neutron-dhcp-agent
+  - neutron-metadata-agent
