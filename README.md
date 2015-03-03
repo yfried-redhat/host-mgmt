@@ -5,8 +5,6 @@ Installation guide:
 ----------------------
 * Install git  
   `yum install git gcc python-devel`
-* Rally is required  
-  [Install rally](https://wiki.openstack.org/wiki/Rally/installation)
 * Clone eventool  
     `git clone https://github.com/yfried-redhat/eventool.git`  
     `cd eventool`  
