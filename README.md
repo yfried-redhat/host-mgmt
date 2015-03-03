@@ -57,6 +57,10 @@ Commands:
 * `raw`  
     `TARGET raw COMMAND`
     
+* `hosts`  
+    `TARGET hosts OP`  
+  OP:  
+    * `alias` display list of aliases for host based on conf file.  
 * `script`  
 `    TARGET script INTERPRETER FILE`
     
