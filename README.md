@@ -36,6 +36,8 @@ Each host is defined by addresses (ip/fqdn) and attributes:
   * roles: a list of roles associated with the host  
 * roles:  
 Each role can contain a list of aliases/addresses that will associate this role with the matching host  
+* fully_active_services:  
+List of services that are Active/Active but don't use VIP. Unable to locate them since they are active on all HA nodes.
 
 
 
