@@ -76,6 +76,9 @@ class Hosts(object):
                 host = self.find_hosts(h)
                 host.add_roles(role)
 
+        self.fully_active_services = set(
+            hosts_conf.get("fully_active_services", set()))
+
     def get_host_role(self, host_role):
         return [host for h, host in self._hosts.iteritems()
                 if host_role in host.host_roles]

@@ -7,9 +7,10 @@ LOG = logger.getLogger(__name__)
 
 
 class HAmanager(object):
-    def __init__(self, ha_hosts):
+    def __init__(self, ha_hosts, active_services=None):
         super(HAmanager, self).__init__()
         self._ha_hosts = ha_hosts
+        self.fully_active_services = active_services or set()
 
     def get_pcs_client(self):
         """Gets a PCS host to retrieve pcs data from """
@@ -19,7 +20,7 @@ class HAmanager(object):
     def get_vip(self, service):
         """ Gets :service vip from from conf
 
-        not needed if vip can be retrieved from PCS
+        Deprecated: vip can be retrieved from PCS
 
         :param service:
         :return:
@@ -52,6 +53,9 @@ class HAmanager(object):
         OS_prefix = "openstack-"
 
         LOG.debug("Locating HA service %s" % service)
+        if service in self.fully_active_services:
+            # TODO(yfried): better exception
+            raise Exception("%s is a fully active service" % service)
         proj = service[len(OS_prefix):] if service.startswith(OS_prefix) \
             else service
         proj = proj.split("-")[0]
