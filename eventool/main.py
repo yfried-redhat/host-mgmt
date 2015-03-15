@@ -129,6 +129,7 @@ def hosts_exec(args):
 
 
 def main():
+    logger.hideTrace(LOG)
     args = parse_arguments()
     if args.debug:
         logger.console.setLevel(logger.logging.DEBUG)
