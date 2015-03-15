@@ -12,7 +12,7 @@ class ServiceMgmt(ssh_cmds.tmp_cmd):
     CMD = "systemctl {op} {service}"
 
     @parsers.add_argument(dest="service")
-    @parsers.cli_choice(parser="service", subparser="op")
+    @parsers.cli_choice(parser="system", subparser="op")
     @ssh_cmds.command_decorator
     def stop(self, service):
         """Stops service on node
@@ -22,7 +22,7 @@ class ServiceMgmt(ssh_cmds.tmp_cmd):
         return self.CMD.format(op='stop', service=service), self._empty_parser
 
     @parsers.add_argument(dest="service")
-    @parsers.cli_choice(parser="service", subparser="op")
+    @parsers.cli_choice(parser="system", subparser="op")
     @ssh_cmds.command_decorator
     def start(self, service):
         """Starts service on node
@@ -95,7 +95,7 @@ class ServiceMgmt(ssh_cmds.tmp_cmd):
 
     # no @command_decorator because we are executing another command
     @parsers.add_argument(dest="service")
-    @parsers.cli_choice(parser="service", subparser="op")
+    @parsers.cli_choice(parser="system", subparser="op")
     def status(self, service):
         """Evaluates the status of the service based on the "ActiveState" field
 

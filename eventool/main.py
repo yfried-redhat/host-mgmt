@@ -33,7 +33,7 @@ def parse_arguments():
     subparse = parser.add_subparsers(title="Parsers", metavar="PARSER")
     raw = subparse.add_parser("raw",
                               help="send the command directly to host(s)")
-    service = subparse.add_parser('service', help="preform op on service")
+    system = subparse.add_parser('system', help="preform op on system service")
     pcs = subparse.add_parser('pcs', help="TBA")
     hosts_parser = subparse.add_parser("hosts", help="get host info")
 
@@ -51,14 +51,9 @@ def parse_arguments():
     add_subparsers(raw, parsers.PARSERS["raw"])
     raw.set_defaults(func=raw_exec)
 
-    # service
-    add_subparsers(service, parsers.PARSERS["service"])
-    # service.add_argument("op",
-    #                      help="operation to execute on service",
-    #                      choices=parsers.PARSERS["service"]["op"])
-    # service.add_argument("service",
-    #                      help="service to work on")
-    service.set_defaults(func=service_exec)
+    # system
+    add_subparsers(system, parsers.PARSERS["system"])
+    system.set_defaults(func=system_exec)
 
     # pcs
     add_subparsers(pcs, parsers.PARSERS["pcs"])
@@ -96,7 +91,7 @@ def add_subparsers(parser, parsers_dict):
                 p.add_argument(**argument)
 
 
-def service_exec(args):
+def system_exec(args):
     target = args.target
     service = args.service
     print getattr(servicemgmt.ServiceMgmt(target.ssh), args.op)(
