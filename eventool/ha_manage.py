@@ -53,7 +53,7 @@ class HAmanager(object):
         LOG.debug("Locating HA service %s" % service)
         if service in self.fully_active_services:
             # TODO(yfried): better exception
-            raise Exception("%s is a fully active service" % service)
+            raise Exception("%s is a fully Active/Active service" % service)
         proj = service[len(OS_prefix):] if service.startswith(OS_prefix) \
             else service
         proj = proj.split("-")[0]
