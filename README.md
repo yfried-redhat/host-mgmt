@@ -42,8 +42,8 @@ List of services that are Active/Active but don't use VIP. Unable to locate them
 Commands:
 --------------
 
-* `service`  
-      TARGET service OP SERVICE  
+* `system`  
+      TARGET system OP SERVICE  
   OP:  
     * `status`
     * `stop`
