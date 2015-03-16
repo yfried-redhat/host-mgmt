@@ -39,19 +39,19 @@ List of services that are Active/Active but don't use VIP. Unable to locate them
 
 ***  
 
-Commands:
+Eventool Commands:
 --------------
 
 * `system`  
-      TARGET system OP SERVICE  
-  OP:  
+      TARGET system ACTION SERVICE  
+  Actions:  
     * `status`
     * `stop`
     * `start`
 
 * `raw`  
-    `TARGET raw OP`  
-  OP:  
+    `TARGET raw ACTION`  
+  Actions:  
     * `script` - Execute script via SSH  
           TARGET script INTERPRETER FILE
         INTERPRETER - program to execute script with (`/bin/bash`, `/bin/python`...)  
@@ -60,15 +60,15 @@ Commands:
           TARGET command [command [arg1 [arg2[...]]]]
     
 * `hosts`  
-        TARGET hosts OP
-  OP:  
+        TARGET hosts ACTION
+  Actions:  
     * `alias` display list of aliases for host based on conf file.  
 
 * `pcs status` - return output of `pcs status` command from host. (for debug only)  
 * `ha_manage`  
-      HA-ROLE ha_manage OP SERVICE
+      HA-ROLE ha_manage ACTION SERVICE
     
   HA-ROLE - role of HA machines    
-  OP:  
+  Actions:  
     * `find_service` - finds the fixed ip of the HA node currently running the service  
   

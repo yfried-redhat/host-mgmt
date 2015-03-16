@@ -30,14 +30,16 @@ def parse_arguments():
                         default=False,
                         help='print debug messages to stderr')
     # parser.set_defaults(func=lambda: version.version_string())
-    subparse = parser.add_subparsers(title="Parsers", metavar="PARSER")
-    raw = subparse.add_parser("raw",
-                              help="send the command directly to host(s)")
-    system = subparse.add_parser('system', help="preform op on system service")
-    pcs = subparse.add_parser('pcs', help="TBA")
-    hosts_parser = subparse.add_parser("hosts", help="get host info")
+    event_commands = parser.add_subparsers(title="Event Commands",
+                                           metavar="EVENTCOMMAND")
+    raw = event_commands.add_parser("raw",
+                                    help="send the command directly to host(s)")
+    system = event_commands.add_parser('system',
+                                       help="preform action on system service")
+    pcs = event_commands.add_parser('pcs', help="TBA")
+    hosts_parser = event_commands.add_parser("hosts", help="get host info")
 
-    for _parser_name, p in subparse.choices.iteritems():
+    for _parser_name, p in event_commands.choices.iteritems():
         p.add_argument("target",
                        help="remote host: ip, FQDN, or alias for a "
                             "single host. host_role is also possible to "
@@ -45,7 +47,7 @@ def parse_arguments():
                             "multiple matching hosts")
 
     # HA needs different details for TARGET
-    ha = subparse.add_parser('ha_manage', help="HA related operations")
+    ha = event_commands.add_parser('ha_manage', help="HA related operations")
 
     # raw
     add_subparsers(raw, parsers.PARSERS["raw"])
@@ -83,9 +85,8 @@ def parse_arguments():
 
 def add_subparsers(parser, parsers_dict):
     for pname, pdict in parsers_dict.iteritems():
-        subparse = parser.add_subparsers(title=pname, metavar=pname.upper(),
-                                         dest=pname)
-        for name, details in pdict.iteritems():
+        subparse = parser.add_subparsers(dest=pname, **pdict['subparser_def'])
+        for name, details in pdict['subparser_args'].iteritems():
             p = subparse.add_parser(name, help=details["help"])
             for argument in details.get("arguments", []):
                 p.add_argument(**argument)
@@ -94,7 +95,7 @@ def add_subparsers(parser, parsers_dict):
 def system_exec(args):
     target = args.target
     service = args.service
-    print getattr(servicemgmt.ServiceMgmt(target.ssh), args.op)(
+    print getattr(servicemgmt.ServiceMgmt(target.ssh), args.action)(
         service)
 
 
@@ -103,7 +104,7 @@ def pcs_exec(args):
     to_args = []
     # if args.service:
     #     to_args.append(args.service)
-    print getattr(pcs.PCSMgmt(target.ssh), args.op)(*to_args)
+    print getattr(pcs.PCSMgmt(target.ssh), args.action)(*to_args)
 
 
 def ha_exec(args):
@@ -111,20 +112,21 @@ def ha_exec(args):
     ha_hosts = args.target
     print getattr(ha_manage.HAmanager(ha_hosts,
                                       args.conf.fully_active_services),
-                  args.op)(service)
+                  args.action)(service)
 
 
 def raw_exec(args):
     target = args.target
     arg_names = [a["dest"] for a in
-                 parsers.PARSERS["raw"]["op"][args.op]["arguments"]]
+                 parsers.PARSERS["raw"]["action"]['subparser_args'][
+                         args.action]["arguments"]]
     kwargs = dict((n, getattr(args, n)) for n in arg_names)
-    print getattr(ssh_cmds.RAWcmd(target.ssh), args.op)(**kwargs)
+    print getattr(ssh_cmds.RAWcmd(target.ssh), args.action)(**kwargs)
 
 
 def hosts_exec(args):
     target = args.target
-    h = getattr(hosts_parser.HostsParser(), args.op)(target)
+    h = getattr(hosts_parser.HostsParser(), args.action)(target)
     print yaml.safe_dump(h, default_flow_style=False)
 
 

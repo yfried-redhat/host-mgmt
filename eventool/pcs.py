@@ -10,6 +10,7 @@ from eventool import parsers
 LOG = logger.getLogger(__name__)
 
 
+@parsers.cli_command("pcs", subparser="action")
 class PCSMgmt(ssh_cmds.tmp_cmd):
 
     def __init__(self, ssh):
@@ -23,7 +24,7 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
         self._cluster = self._cluster or self.status_xml()
         return self._cluster
 
-    @parsers.cli_choice(parser="pcs", subparser="op")
+    @parsers.cli_choice(parser="pcs", subparser="action")
     @ssh_cmds.command_decorator
     def status(self):
         """Returns full PCS status. """
@@ -125,7 +126,7 @@ class PCSMgmt(ssh_cmds.tmp_cmd):
                                     exact=exact_match)
         return x_list
 
-    # @ssh_cmds.cli_choice(parser="pcs", handler="op")
+    # @ssh_cmds.cli_choice(parser="pcs", handler="action")
     # def cluster_nodes(self):
     #     out = self.cluster.get("nodes")["node"]
     #     return json.dumps(out)

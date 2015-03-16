@@ -6,6 +6,8 @@ from eventool import pcs
 LOG = logger.getLogger(__name__)
 
 
+@parsers.cli_command("ha", subparser="action",
+                     help="Available actions for HA management")
 class HAmanager(object):
     def __init__(self, ha_hosts, active_services=None):
         super(HAmanager, self).__init__()
@@ -41,7 +43,7 @@ class HAmanager(object):
         return vip
 
     @parsers.add_argument("service")
-    @parsers.cli_choice(parser="ha", subparser="op")
+    @parsers.cli_choice(parser="ha", subparser="action")
     def find_service(self, service):
         """Finds active node for service from HA manager
 

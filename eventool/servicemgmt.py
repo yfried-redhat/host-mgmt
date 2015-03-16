@@ -8,28 +8,29 @@ from eventool import parsers
 LOG = logger.getLogger(__name__)
 
 
+@parsers.cli_command("system", subparser="action")
 class ServiceMgmt(ssh_cmds.tmp_cmd):
-    CMD = "systemctl {op} {service}"
+    CMD = "systemctl {action} {service}"
 
     @parsers.add_argument(dest="service")
-    @parsers.cli_choice(parser="system", subparser="op")
+    @parsers.cli_choice(parser="system", subparser="action")
     @ssh_cmds.command_decorator
     def stop(self, service):
         """Stops service on node
 
         :param service: service to stop
         """
-        return self.CMD.format(op='stop', service=service), self._empty_parser
+        return self.CMD.format(action='stop', service=service), self._empty_parser
 
     @parsers.add_argument(dest="service")
-    @parsers.cli_choice(parser="system", subparser="op")
+    @parsers.cli_choice(parser="system", subparser="action")
     @ssh_cmds.command_decorator
     def start(self, service):
         """Starts service on node
 
         :param service: service to start
         """
-        return self.CMD.format(op='start', service=service), self._empty_parser
+        return self.CMD.format(action='start', service=service), self._empty_parser
 
     # TODO(yfried): add cli decorators
     def restart(self, service, timeout=10):
@@ -90,12 +91,12 @@ class ServiceMgmt(ssh_cmds.tmp_cmd):
         :return: status: Known values ['active', 'failed', 'inactive']
         """
 
-        cmd = self.CMD.format(op='show', service=service)
+        cmd = self.CMD.format(action='show', service=service)
         return cmd, self._status_parser
 
     # no @command_decorator because we are executing another command
     @parsers.add_argument(dest="service")
-    @parsers.cli_choice(parser="system", subparser="op")
+    @parsers.cli_choice(parser="system", subparser="action")
     def status(self, service):
         """Evaluates the status of the service based on the "ActiveState" field
 
