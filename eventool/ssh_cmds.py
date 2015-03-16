@@ -66,9 +66,10 @@ class tmp_cmd(object):
 #     return decorator
 
 
+@parsers.cli_command("raw", subparser="action")
 class RAWcmd(tmp_cmd):
     @parsers.add_argument(dest="input", nargs="*", default=None)
-    @parsers.cli_choice(parser="raw", subparser="op")
+    @parsers.cli_choice(parser="raw", subparser="action")
     @command_decorator
     def command(self, input):
         """Execute a single command from input via SSH
@@ -82,7 +83,7 @@ class RAWcmd(tmp_cmd):
 
     @parsers.add_argument("path", type=argparse.FileType("rb"))
     @parsers.add_argument("interpreter")
-    @parsers.cli_choice(parser="raw", subparser="op")
+    @parsers.cli_choice(parser="raw", subparser="action")
     def script(self, interpreter, path):
         """Execute a script on host
 

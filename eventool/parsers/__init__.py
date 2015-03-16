@@ -6,10 +6,6 @@ PARSERS = {}
 
 
 def cli_choice(parser, subparser=None):
-    if subparser:
-        PARSERS.setdefault(parser, {})
-        PARSERS[parser].setdefault(subparser, {})
-
     def decorator(f):
         if subparser:
             name = f.func_name
@@ -22,13 +18,30 @@ def cli_choice(parser, subparser=None):
             #     optional_args.reverse()
             # positional_args = []
             f._parser_dict = {"help": help}
-            PARSERS[parser][subparser][name] = f._parser_dict
+            PARSERS[parser][subparser]['subparser_args'][name] = f._parser_dict
 
         @functools.wraps(f)
         def func(self, *args, **kwargs):
             return f(self, *args, **kwargs)
         return func
     return decorator
+
+
+def cli_command(parser, subparser=None, **kwargs):
+    if subparser:
+        PARSERS.setdefault(parser, {})
+        kwargs.setdefault("title",
+                          subparser[:1].upper() + subparser[1:] + "s")
+        kwargs.setdefault("metavar", subparser.upper())
+        PARSERS[parser].setdefault(subparser, {'subparser_def': kwargs,
+                                               'subparser_args': {}})
+
+    def class_decorator(f):
+        @functools.wraps(f)
+        def func(self, *args, **kwargs):
+            return f(self, *args, **kwargs)
+        return func
+    return class_decorator
 
 
 def add_argument(dest, **kwargs):
