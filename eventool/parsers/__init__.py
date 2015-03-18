@@ -36,12 +36,10 @@ def cli_command(parser, subparser=None, **kwargs):
         PARSERS[parser].setdefault(subparser, {'subparser_def': kwargs,
                                                'subparser_args': {}})
 
-    def class_decorator(f):
-        @functools.wraps(f)
-        def func(self, *args, **kwargs):
-            return f(self, *args, **kwargs)
-        return func
-    return class_decorator
+    # def class_decorator(cls):
+    #     return cls
+    # return class_decorator
+    return lambda cls: cls
 
 
 def add_argument(dest, **kwargs):
